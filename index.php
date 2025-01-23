@@ -1,5 +1,5 @@
 <?
-
+ require 'src/db.php';
 ?>
 
 <!DOCTYPE html>
