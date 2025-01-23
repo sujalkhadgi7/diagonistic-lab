@@ -17,12 +17,12 @@
             <h1>OS Diagnostic Lab</h1>
         </div>
         <nav>
-            <ul>
-                <li><a href="javascript:void(0)" >Home</a></li>
-                <li><a href="javascript:void(0)" >About Us</a></li>
-                <li><a href="javascript:void(0)" >Health Packages</a></li>
-                <li><a href="javascript:void(0)" >Contact</a></li>
-                <li><a href="javascript:void(0)" >Test Results</a></li>
+             <ul>
+                <li><a href="." >Home</a></li>
+                <li><a href="about.php" >About Us</a></li>
+                <li><a href="health-package.php" >Health Packages</a></li>
+                <li><a href="contact.php" >Contact</a></li>
+                <li><a href="test-result.php" >Test Results</a></li>
             </ul>
         </nav>
     </header>
