@@ -25,18 +25,17 @@
         </nav>
     </header>
 
-     <!-- Booking Form (Hidden by default) -->
      <div id="booking-form" class="section-container">
         <h2>Booking Appointment</h2>
-        <form id="appointment-form" action="./src/appointment.php" method="POST">
-            <label for="patient-name">Name:</label>
-            <input type="text" id="patient-name" name="patient-name" required>
-            <label for="patient-email">Email:</label>
-            <input type="email" id="patient-email" name="patient-email" required>
+        <form  action="booking-success.php" method="POST" enctype="multipart/form-data">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
             <label for="package-name">Health Package:</label>
-            <input type="text" id="package-name" name="package-name" value="<?php if(isset($_GET['package-name'])) echo $_GET['package-name'] ;?>"  disabled />
-            <!-- <label for="appointment-date">Date:</label>
-            <input type="date" id="appointment-date" name="appointment-date" required> -->
+            <input type="text" id="package" name="package" value="<?php if(isset($_GET['package'])) echo $_GET['package'] ;?>" readonly />
             <button type="submit">Book Now</button>                                                                       
         </form>
     </div>
@@ -48,3 +47,6 @@
     </body>
 </html>
 
+
+
+ 

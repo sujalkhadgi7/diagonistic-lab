@@ -34,12 +34,12 @@
             <div class="package-item">
                 <h3>Lipid Profile</h3>
                 <p>Test for cholesterol levels, including total cholesterol, LDL, HDL, and triglycerides.</p>
-                <a href="booking-form.php?package-name=Lipid Profile" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Lipid Profile" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Basic Diabetes Package</h3>
                 <p>Includes blood sugar tests, HbA1C, and insulin resistance test to monitor diabetes.</p>
-                <a href="booking-form.php?package-name=Basic Diabetes Package" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Basic Diabetes Package" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Hemoglobin A1C</h3>
