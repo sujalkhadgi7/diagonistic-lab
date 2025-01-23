@@ -22,7 +22,7 @@
                 <li><a href="about.php" >About Us</a></li>
                 <li><a href="health-package.php" >Health Packages</a></li>
                 <li><a href="contact.php" >Contact</a></li>
-                <li><a href="test-result.php" >Test Results</a></li>
+                <li><a href="test-results.php" >Test Results</a></li>
             </ul>
         </nav>
     </header>
