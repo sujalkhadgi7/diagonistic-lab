@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Diagnostic Lab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="logo">
+            <h1>OS Diagnostic Lab</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="javascript:void(0)" onclick="showSection('home')">Home</a></li>
+                <li><a href="javascript:void(0)" onclick="showSection('about')">About Us</a></li>
+                <li><a href="javascript:void(0)" onclick="showSection('packages')">Health Packages</a></li>
+                <li><a href="javascript:void(0)" onclick="showSection('contact')">Contact</a></li>
+                <li><a href="javascript:void(0)" onclick="showSection('results')">Test Results</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Home Section -->
+    <section id="home" class="section-container active">
+        <h2>Welcome to OS Diagnostic Lab</h2>
+        <p>Providing quality health diagnostic services with a wide range of packages to meet your needs.</p>
+        <div class="home-image-container">
+            <img src="lab photo.jpg" alt="Diagnostic Lab Image" class="home-image">
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="section-container">
+        <h2>About Us</h2>
+        <p>OS Diagnostic Lab is committed to providing comprehensive diagnostic services. We offer a wide range of health packages designed to meet your needs and ensure your well-being. Our team of medical experts ensures accurate results with state-of-the-art equipment.</p>
+    </section>
+
+    <!-- Health Packages Section -->
+    <section id="packages" class="section-container">
+        <h2>Our Test Packages</h2>
+        <div class="package-list">
+            <div class="package-item">
+                <h3>Lipid Profile</h3>
+                <p>Test for cholesterol levels, including total cholesterol, LDL, HDL, and triglycerides.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Lipid Profile')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Basic Diabetes Package</h3>
+                <p>Includes blood sugar tests, HbA1C, and insulin resistance test to monitor diabetes.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Basic Diabetes Package')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Hemoglobin A1C</h3>
+                <p>Test for tracking blood sugar control over the last 2-3 months, useful for diabetes management.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Hemoglobin A1C')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Complete Blood Count (CBC)</h3>
+                <p>A comprehensive test to evaluate overall health and detect a variety of disorders.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Complete Blood Count (CBC)')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Thyroid Function Test</h3>
+                <p>Tests to evaluate thyroid function, including TSH, T3, and T4 levels.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Thyroid Function Test')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Liver Function Test (LFT)</h3>
+                <p>Tests for liver enzymes, bilirubin levels, and proteins to assess liver health.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Liver Function Test (LFT)')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Kidney Function Test</h3>
+                <p>Tests including creatinine and urea to evaluate kidney health.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Kidney Function Test')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Vitamin D Test</h3>
+                <p>Test to measure vitamin D levels and ensure proper bone health.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Vitamin D Test')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Iron Studies</h3>
+                <p>Tests to check iron levels, including serum iron, ferritin, and TIBC.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Iron Studies')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Allergy Panel</h3>
+                <p>A comprehensive test to identify common allergens affecting the body.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Allergy Panel')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Cardiac Risk Markers</h3>
+                <p>Tests to evaluate risk factors for cardiovascular diseases, including hs-CRP and homocysteine.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Cardiac Risk Markers')">Book Now</a>
+            </div>
+            <div class="package-item">
+                <h3>Hormonal Profile</h3>
+                <p>Tests to evaluate key hormones like estrogen, testosterone, and cortisol.</p>
+                <a href="#booking-form" class="btn" onclick="openBooking('Hormonal Profile')">Book Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact" class="section-container">
+        <h2>Contact Us</h2>
+        <p>Phone: 01-546585, 977-9865321202</p>
+        <p>Address: Sanogaun, Lalitpur</p>
+    </section>
+
+    <!-- Test Results Section -->
+    <section id="results" class="section-container">
+        <h2>Test Results</h2>
+        <p>Here you can check the results of your tests once they are available.</p>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 OS Diagnostic Lab | All Rights Reserved</p>
+    </footer>
+
+    <!-- Booking Form (Hidden by default) -->
+    <div id="booking-form" class="section-container">
+        <h2>Booking Appointment</h2>
+        <form id="appointment-form">
+            <label for="patient-name">Name:</label>
+            <input type="text" id="patient-name" name="patient-name" required>
+            <label for="patient-email">Email:</label>
+            <input type="email" id="patient-email" name="patient-email" required>
+            <label for="package-name">Health Package:</label>
+            <input type="text" id="package-name" name="package-name" disabled>
+            <label for="appointment-date">Date:</label>
+            <input type="date" id="appointment-date" name="appointment-date" required>
+            <button type="submit">Book Now</button>
+        </form>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

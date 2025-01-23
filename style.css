@@ -1,0 +1,149 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+}
+
+header .logo {
+    display: inline-block;
+}
+
+header nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+}
+
+header nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+header nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+header nav ul li a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    font-size: 2.5em;
+}
+
+/* Section Styles */
+.section-container {
+    display: none;
+    padding: 20px;
+    background-color: #f4f4f4;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+.section-container.active {
+    display: block;
+}
+
+/* Health Packages */
+.package-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.package-item {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.package-item h3 {
+    margin-top: 0;
+}
+
+.package-item .btn {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.package-item .btn:hover {
+    background-color: #45a049;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 0;
+}
+
+footer p {
+    margin: 0;
+}
+
+/* Home Section */
+#home {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.home-image-container {
+    width: 100%;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.home-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* Programs Section */
+.programs {
+    margin-top: 40px;
+    text-align: left;
+    display: inline-block;
+    padding-left: 30px;
+}
+
+.programs h3 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+.programs ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.programs li {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.programs li:before {
+    content: "✔";
+    margin-right: 10px;
+    color: green;
+    font-weight: bold;
+}
