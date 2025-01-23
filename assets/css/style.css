@@ -44,7 +44,7 @@ h1 {
 
 /* Section Styles */
 .section-container {
-    display: none;
+    display: block;
     padding: 20px;
     background-color: #f4f4f4;
     margin: 20px;
