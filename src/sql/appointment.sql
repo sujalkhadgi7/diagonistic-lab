@@ -1,0 +1,1 @@
+CREATE TABLE `jobportal`.`appointment` (`name` TEXT NOT NULL , `email` TEXT NOT NULL , `package` TEXT NOT NULL , `date` DATE NULL , `id` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;

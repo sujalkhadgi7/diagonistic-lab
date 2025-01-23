@@ -1,5 +1,6 @@
 <?
- require 'src/db.php';
+   
+
 ?>
 
 <!DOCTYPE html>
@@ -38,7 +39,7 @@
     <footer>
         <p>&copy; 2024 OS Diagnostic Lab | All Rights Reserved</p>
     </footer>
-
+    
     </body>
 </html>
 
