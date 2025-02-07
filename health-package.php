@@ -44,52 +44,52 @@
             <div class="package-item">
                 <h3>Hemoglobin A1C</h3>
                 <p>Test for tracking blood sugar control over the last 2-3 months, useful for diabetes management.</p>
-                <a href="#booking-form" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Hemoglobin A1C" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Complete Blood Count (CBC)</h3>
                 <p>A comprehensive test to evaluate overall health and detect a variety of disorders.</p>
-                <a href="#booking-form" class="btn">Book Now</a>
+                <a href="booking-form.php?package=Complete Blood Count" class="btn">Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Thyroid Function Test</h3>
                 <p>Tests to evaluate thyroid function, including TSH, T3, and T4 levels.</p>
-                <a href="#booking-form" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Thyroid Function Test" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Liver Function Test (LFT)</h3>
                 <p>Tests for liver enzymes, bilirubin levels, and proteins to assess liver health.</p>
-                <a href="#booking-form" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Liver Function Test" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Kidney Function Test</h3>
                 <p>Tests including creatinine and urea to evaluate kidney health.</p>
-                <a href="#booking-form" class="btn"  >Book Now</a>
+                <a href="booking-form.php?package=Kidney Function Test" class="btn"  >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Vitamin D Test</h3>
                 <p>Test to measure vitamin D levels and ensure proper bone health.</p>
-                <a href="#booking-form" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Vitamin D Test" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Iron Studies</h3>
                 <p>Tests to check iron levels, including serum iron, ferritin, and TIBC.</p>
-                <a href="#booking-form" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Iron Studies" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Allergy Panel</h3>
                 <p>A comprehensive test to identify common allergens affecting the body.</p>
-                <a href="#booking-form" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Allergy Panel" class="btn" >Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Cardiac Risk Markers</h3>
                 <p>Tests to evaluate risk factors for cardiovascular diseases, including hs-CRP and homocysteine.</p>
-                <a href="#booking-form" class="btn">Book Now</a>
+                <a href="booking-form.php?package=Cardiac Risk Makers" class="btn">Book Now</a>
             </div>
             <div class="package-item">
                 <h3>Hormonal Profile</h3>
                 <p>Tests to evaluate key hormones like estrogen, testosterone, and cortisol.</p>
-                <a href="#booking-form" class="btn" >Book Now</a>
+                <a href="booking-form.php?package=Hormonal Profile" class="btn" >Book Now</a>
             </div>
         </div>
     </section>

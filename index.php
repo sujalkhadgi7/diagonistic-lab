@@ -32,7 +32,7 @@
         <h2>Welcome to OS Diagnostic Lab</h2>
         <p>Providing quality health diagnostic services with a wide range of packages to meet your needs.</p>
         <div class="home-image-container">
-            <img src="lab photo.jpg" alt="Diagnostic Lab Image" class="home-image">
+            <img src="./assets/image/lab_photo.jpg" alt="Diagnostic Lab Image" class="home-image">
         </div>
     </section>
 
