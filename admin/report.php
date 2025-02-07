@@ -20,7 +20,7 @@ if (!$_SESSION["loggedIn"]) {
   <div class="sidebar">
     <h2>Admin Dashboard</h2>
     <ul>
-    <li><a href="dashboard.php">Dashboard</a></li>
+      <li><a href="dashboard.php">Dashboard</a></li>
       <li><a href="users.php">Users</a></li>
       <li><a href="appointments.php">Appointments</a></li>
       <li><a href="health-package.php">Health Packages</a></li>
@@ -31,9 +31,7 @@ if (!$_SESSION["loggedIn"]) {
 
   <div class="main-content">
     <div class="header">
-      <h1>Welcome, <?php
-        echo( $_SESSION['name'])
-      ?></h1>
+      <h1>Welcome, Admin</h1>
       <p>Manage your lab system efficiently.</p>
     </div>
 

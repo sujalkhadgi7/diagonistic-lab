@@ -31,9 +31,7 @@ if (!$_SESSION["loggedIn"]) {
 
   <div class="main-content">
     <div class="header">
-      <h1>Welcome, <?php
-        echo( $_SESSION['name'])
-      ?></h1>
+      <h1>Welcome, Admin</h1>
       <p>Manage your lab system efficiently.</p>
     </div>
 
