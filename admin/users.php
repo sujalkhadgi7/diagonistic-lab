@@ -48,7 +48,6 @@ if (!$_SESSION["loggedIn"]) {
               <tr>
                 <th>User ID</th>
                 <th>Name</th>
-                
                 <th>Email</th>
                 <th>Role</th>
                 <th>Action</th>

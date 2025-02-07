@@ -1,11 +1,16 @@
 <?php
+require '../src/db.php';
 session_start();
-
 if (!$_SESSION["loggedIn"]) {
   header('location: login.php');
   die;
 }
-
+$sql = "SELECT COUNT(*) AS user_count FROM user";
+$data = $conn->query($sql);
+if($data->num_rows > 0){
+  $result = $data->fetch_assoc();
+  $userCount = $result['user_count'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,7 +45,9 @@ if (!$_SESSION["loggedIn"]) {
     <div class="grid">
       <div class="card">
         <h3>Total Users</h3>
-        <p>120</p>
+        <p><?php  
+          echo($userCount)
+        ?></p>
       </div>
       <div class="card">
         <h3>Appointments Today</h3>
