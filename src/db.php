@@ -1,6 +1,6 @@
 <?php
 
-require_once("constants/index.php");
+require_once("./constants/index.php");
 $servername = "localhost";
 $username = "root";
 $password = "";
