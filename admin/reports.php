@@ -85,7 +85,7 @@ if (isset($_POST['update_appointment'])) {
               <th>Email</th>
               <th>Phone</th>
               <th>Package</th>
-              <th>Appointment Date</th>
+              <th>Report</th>
             </tr>
           </thead>
           <tbody id="appointmentsBody">
@@ -160,7 +160,7 @@ if (isset($_POST['update_appointment'])) {
                             <td>${app.phone}</td>
                             <td>${app.package}</td>
                             <td>
-                                ${!app.date ? `<button class="openModalBtn" data-appointment-id="${app.id}" data-current-date="${app.date}">Set Appointment Date</button>` : app.date}
+                                ${!app.report ? `<button class="openModalBtn" data-appointment-id="${app.id}" data-current-date="${app.date}">Set Report </button>` : app.date}
                             </td>
                         </tr>`;})
                     tableBody.innerHTML += row;
