@@ -1,11 +1,6 @@
 <?php
 
-require_once("./constants/index.php");
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "jobportal";
-// $dbname = "os_diagnostic_lab";
+require("./constants/index.php");
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
