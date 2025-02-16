@@ -1,0 +1,160 @@
+<?php
+require '../src/db.php';
+session_start();
+
+if (!$_SESSION["loggedIn"]) {
+  header('location: login.php');
+  die;
+}
+
+
+// $currentDate = date("Y-m-d");
+// $sql = "SELECT * FROM appointment WHERE DATE(date) = :currentDate ";
+// $stmt = $conn->prepare($sql);
+// $stml->bind_param(":currentDate", $currentDate);
+// $data = $conn->query($sql);
+
+$todaysDate = date("Y-m-d"); # or any other date
+$query_today = $conn->prepare("SELECT * FROM appointment WHERE DATE(date) = ?");
+$query_today->bind_param("s", $todaysDate);
+$query_today->execute();
+
+
+
+// Handle form submission to update the appointment date
+if (isset($_POST['update_appointment'])) {
+  $appointmentId = $_POST['appointment_id'];
+  $newAppointmentDate = $_POST['appointment_date'];
+
+  $updateSql = "UPDATE appointment SET date = ? WHERE id = ?";
+  $stmt = $conn->prepare($updateSql);
+  $stmt->bind_param("si", $newAppointmentDate, $appointmentId);
+  $stmt->execute();
+  $stmt->close();
+  header("Refresh: 0"); 
+}
+
+
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Report</title>
+    <link rel="stylesheet" href="../assets/css/admin-dashboard.css"> <!-- Link to your existing CSS file -->
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="dashboard.php">Dashboard</a></li>
+            <li><a href="users.php">Users</a></li>
+            <li><a href="appointments.php">Appointments</a></li>
+            <li><a href="reports.php" class="active">Reports</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h2>Appointment Report</h2>
+        </div>
+
+        <!-- Date Selection Form -->
+        <div class="card">
+          <div class="date-selector-container">
+            <label for="appointmentDate">Select Date:</label>
+            <input type="date" id="appointmentDate">
+            <button class="btn" onclick="fetchAppointments()">Get Appointments</button>
+          </div>
+        </div>
+
+        <!-- Table to Display Appointments -->
+        <div class="card">
+        <div class="table-container">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Package</th>
+              <th>Appointment Date</th>
+            </tr>
+          </thead>
+          <tbody id="appointmentsBody">
+            <?php if ($data->num_rows > 0): ?>
+              <?php while ($row = $data->fetch_assoc()): ?>
+                <tr>
+                  <td><?php echo $row["id"]; ?></td>
+                  <td><?php echo $row["name"]; ?></td>
+                  <td><?php echo $row["email"]; ?></td>
+                  <td><?php echo $row["phone"]; ?></td>
+                  <td><?php echo $row["package"]; ?></td>
+                  <td>
+                  <?php if (!$row["date"]): ?>
+                    <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>" data-current-date="<?php echo $row["date"]; ?>">Set Appointment Date</button>
+                    <?php else: echo $row["date"] ?> 
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endwhile; ?>
+            <?php else: ?>
+              <tr>
+                <td colspan="6">No appointments found.</td>
+              </tr>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+        </div>
+    </div>
+
+    <script>
+        function fetchAppointments() {
+
+          
+          var selectedDate = document.getElementById("appointmentDate").value;
+          var tableBody = document.getElementById("appointmentsBody");
+          
+          tableBody.innerHTML = "";
+
+          console.log(selectedDate)
+          
+          if (!selectedDate) {
+              alert("Please select a date.");
+                return;
+            }
+
+            fetch("fetch-appointments.php?date=" + selectedDate)
+                .then(response => response.json())
+                .then(data => {
+                    tableBody.innerHTML = "";
+                    if (data.length > 0) {
+                        data.forEach(app => {
+                            var row = `<tr>
+                                <td>${app.id}</td>
+                                <td>${app.name}</td>
+                                <td>${app.doctor}</td>
+                                <td>${app.time}</td>
+                                <td>${app.status}</td>
+                            </tr>`;
+                            tableBody.innerHTML += row;
+                        });
+                    } else {
+                        tableBody.innerHTML = `<tr><td colspan="5" class="no-data">No appointments found</td></tr>`;
+                    }
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        }
+    </script>
+
+</body>
+</html>
