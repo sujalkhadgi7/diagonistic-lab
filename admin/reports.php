@@ -116,6 +116,20 @@ if (isset($_POST['update_appointment'])) {
         </div>
     </div>
 
+    <!-- Modal to set appointment date -->
+  <div id="appointmentModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Set Appointment Date</h2>
+      <form action="appointments.php" method="POST">
+        <input type="hidden" id="appointment_id" name="appointment_id">
+        <label for="appointment_date">Choose a date and time:</label>
+        <input type="datetime-local" id="appointment_date" name="appointment_date" required>
+        <button type="submit" name="update_appointment">Update Appointment</button>
+      </form>
+    </div>
+  </div>
+
     <script>
         function fetchAppointments() {
 
@@ -156,6 +170,37 @@ if (isset($_POST['update_appointment'])) {
                 })
                 .catch(error => console.error("Error fetching data:", error));
         }
+
+        // Get modal and open buttons
+    var modal = document.getElementById("appointmentModal");
+    var btns = document.querySelectorAll(".openModalBtn");
+    var span = document.getElementsByClassName("close")[0];
+
+    // Open modal when the button is clicked
+    btns.forEach(function (btn) {
+      btn.onclick = function() {
+        var appointmentId = this.getAttribute("data-appointment-id");
+        var currentDate = this.getAttribute("data-current-date");
+
+        // Set the appointment ID and pre-fill current date if available
+        document.getElementById("appointment_id").value = appointmentId;
+        document.getElementById("appointment_date").value = currentDate || "";
+        
+        modal.style.display = "block";
+      }
+    });
+
+    // Close modal when the close button is clicked
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    // Close modal when clicked outside the modal content
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
     </script>
 
 </body>
