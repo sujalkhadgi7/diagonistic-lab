@@ -8,16 +8,19 @@ if (!$_SESSION["loggedIn"]) {
 }
 
 
-// $currentDate = date("Y-m-d");
-// $sql = "SELECT * FROM appointment WHERE DATE(date) = :currentDate ";
-// $stmt = $conn->prepare($sql);
-// $stml->bind_param(":currentDate", $currentDate);
-// $data = $conn->query($sql);
+$currentDate = date("Y-m-d");
+$sql = "SELECT * FROM appointment WHERE DATE(date) = ? ";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $currentDate);
+$stmt->execute();
+$result = $stmt->get_result();
+$data = $result->fetch_all(MYSQLI_ASSOC);
 
-$todaysDate = date("Y-m-d"); # or any other date
-$query_today = $conn->prepare("SELECT * FROM appointment WHERE DATE(date) = ?");
-$query_today->bind_param("s", $todaysDate);
-$query_today->execute();
+
+// $todaysDate = date("Y-m-d"); # or any other date
+// $query_today = $conn->prepare("SELECT * FROM appointment WHERE DATE(date) = ?");
+// $query_today->bind_param("s", $todaysDate);
+// $query_today->execute();
 
 
 
@@ -120,7 +123,6 @@ if (isset($_POST['update_appointment'])) {
     <script>
         function fetchAppointments() {
 
-          
           var selectedDate = document.getElementById("appointmentDate").value;
           var tableBody = document.getElementById("appointmentsBody");
           
@@ -138,18 +140,22 @@ if (isset($_POST['update_appointment'])) {
                 .then(data => {
                     tableBody.innerHTML = "";
                     if (data.length > 0) {
-                        data.forEach(app => {
-                            var row = `<tr>
-                                <td>${app.id}</td>
-                                <td>${app.name}</td>
-                                <td>${app.doctor}</td>
-                                <td>${app.time}</td>
-                                <td>${app.status}</td>
-                            </tr>`;
-                            tableBody.innerHTML += row;
-                        });
+                      console.log(data);
+                      
+                      let row =data.map(app => {
+                        return `<tr>
+                            <td>${app.id}</td>
+                            <td>${app.name}</td>
+                            <td>${app.email}</td>
+                            <td>${app.phone}</td>
+                            <td>${app.package}</td>
+                            <td>
+                                ${!app.date ? `<button class="openModalBtn" data-appointment-id="${app.id}" data-current-date="${app.date}">Set Appointment Date</button>` : app.date}
+                            </td>
+                        </tr>`;})
+                    tableBody.innerHTML += row;
                     } else {
-                        tableBody.innerHTML = `<tr><td colspan="5" class="no-data">No appointments found</td></tr>`;
+                        tableBody.innerHTML = `<tr><td colspan="6" class="no-data">No appointments found</td></tr>`;
                     }
                 })
                 .catch(error => console.error("Error fetching data:", error));

@@ -1,5 +1,3 @@
-<!-- connect to mysql server -->
-
 <?php
 
 $servername = "localhost";

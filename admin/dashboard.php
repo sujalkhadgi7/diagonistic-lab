@@ -1,16 +1,42 @@
-<?php
+=<?php
 require '../src/db.php';
 session_start();
 if (!$_SESSION["loggedIn"]) {
   header('location: login.php');
   die;
 }
+
+// Get total users
 $sql = "SELECT COUNT(*) AS user_count FROM user";
 $data = $conn->query($sql);
-if($data->num_rows > 0){
+$userCount = 0;
+if ($data->num_rows > 0) {
   $result = $data->fetch_assoc();
   $userCount = $result['user_count'];
 }
+
+// get total Appointment 
+$sql = "SELECT COUNT(*) AS appointment_count FROM appointment";
+$data = $conn->query($sql);
+$totalAppointment = 0; 
+if ($data->num_rows > 0) {
+  $result = $data->fetch_assoc();
+  $totalAppointment = $result['appointment_count'];
+}
+
+
+// Get today's appointments where report is not NULL
+$currentDate = date('Y-m-d');
+$sql = "SELECT COUNT(*) AS today_appointment FROM appointment WHERE DATE(date) = ? AND report IS NULL";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $currentDate);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+
+$todayAppointment = $row['today_appointment'];
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,22 +62,18 @@ if($data->num_rows > 0){
 
   <div class="main-content">
     <div class="header">
-      <h1>Welcome, <?php
-        echo( $_SESSION['name'])
-      ?></h1>
+      <h1>Welcome, <?php echo $_SESSION['name']; ?></h1>
       <p>Manage your lab system efficiently.</p>
     </div>
 
     <div class="grid">
       <div class="card">
         <h3>Total Users</h3>
-        <p><?php  
-          echo($userCount)
-        ?></p>
+        <p><?php echo $userCount; ?></p>
       </div>
       <div class="card">
         <h3>Appointments Today</h3>
-        <p>15</p>
+        <p><?php echo $todayAppointment; ?></p>
       </div>
       <div class="card">
         <h3>New Reports</h3>
@@ -59,7 +81,7 @@ if($data->num_rows > 0){
       </div>
       <div class="card">
         <h3>Health Packages Sold</h3>
-        <p>30</p>
+        <p><?php echo $totalAppointment;  ?></p>
       </div>
     </div>
   </div>
