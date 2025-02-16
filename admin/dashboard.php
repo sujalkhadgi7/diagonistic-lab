@@ -1,4 +1,4 @@
-=<?php
+<?php
 require '../src/db.php';
 session_start();
 if (!$_SESSION["loggedIn"]) {
@@ -7,7 +7,7 @@ if (!$_SESSION["loggedIn"]) {
 }
 
 // Get total users
-$sql = "SELECT COUNT(*) AS user_count FROM user";
+$sql = "SELECT COUNT(*) AS user_count FROM $table[USER]";
 $data = $conn->query($sql);
 $userCount = 0;
 if ($data->num_rows > 0) {
@@ -16,7 +16,7 @@ if ($data->num_rows > 0) {
 }
 
 // get total Appointment 
-$sql = "SELECT COUNT(*) AS appointment_count FROM appointment";
+$sql = "SELECT COUNT(*) AS appointment_count FROM $table[APPOINTMENT]";
 $data = $conn->query($sql);
 $totalAppointment = 0; 
 if ($data->num_rows > 0) {
@@ -27,7 +27,7 @@ if ($data->num_rows > 0) {
 
 // Get today's appointments where report is not NULL
 $currentDate = date('Y-m-d');
-$sql = "SELECT COUNT(*) AS today_appointment FROM appointment WHERE DATE(date) = ? AND report IS NULL";
+$sql = "SELECT COUNT(*) AS today_appointment FROM $table[APPOINTMENT] WHERE DATE(date) = ? AND report IS NULL";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $currentDate);
 $stmt->execute();

@@ -7,7 +7,7 @@ if (isset($_GET['date']) && !empty($_GET['date'])) {
     $selectedDate = $_GET['date'];
 
     // Prepare and execute the query
-    $query = $conn->prepare("SELECT * FROM appointment WHERE date = ? AND report IS null");
+    $query = $conn->prepare("SELECT * FROM $table[APPOINTMENT] WHERE date = ? AND report IS null");
     $query->bind_param("s", $selectedDate);
     $query->execute();
     

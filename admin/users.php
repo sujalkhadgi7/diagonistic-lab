@@ -8,7 +8,7 @@ if (!$_SESSION["loggedIn"]) {
   die;
 }
 
-  $sql = "SELECT * FROM user";
+  $sql = "SELECT * FROM $table[USER]";
   $data = $conn->query($sql);
   if($data->num_rows > 0){
     $users = $data->fetch_assoc();

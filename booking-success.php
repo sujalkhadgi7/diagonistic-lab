@@ -1,24 +1,13 @@
 <?php
-   $servername = "localhost";
-   $username = "root";
-   $password = "";
-   $dbname = "jobportal";
-   
-   // Create connection
-   $conn = new mysqli($servername, $username, $password, $dbname);
-   
-   // Check connection
-   if ($conn->connect_error) {
-       die("Connection failed: " . $conn->connect_error);
-   }
+   require 'src/db.php';
    
    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name'])) {
        $name = mysqli_real_escape_string($conn, $_POST['name']);
-       $email = mysqli_real_escape_string($conn, $_POST['email']);; // Replace with actual value or $_POST variable
-       $phone = mysqli_real_escape_string($conn, $_POST['phone']);       // Replace with actual value or $_POST variable
-       $package = mysqli_real_escape_string($conn, $_POST['package']);       // Replace with actual value or $_POST variable
+       $email = mysqli_real_escape_string($conn, $_POST['email']); 
+       $phone = mysqli_real_escape_string($conn, $_POST['phone']);       
+       $package = mysqli_real_escape_string($conn, $_POST['package']);      
 
-       $sql = "INSERT INTO appointment (name, email,phone, package, date) VALUES ('$name', '$email','$phone', '$package', NULL)";
+       $sql = "INSERT INTO $table[APPOINTMENT] (name, email,phone, package, date) VALUES ('$name', '$email','$phone', '$package', NULL)";
 
        if ($conn->query($sql) === TRUE) {
            echo "New record created successfully";

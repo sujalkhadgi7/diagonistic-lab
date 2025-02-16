@@ -9,7 +9,7 @@ if (!$_SESSION["loggedIn"]) {
 
 
 $currentDate = date("Y-m-d");
-$sql = "SELECT * FROM appointment WHERE DATE(date) = ? ";
+$sql = "SELECT * FROM $table[APPOINTMENT] WHERE DATE(date) = ? ";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $currentDate);
 $stmt->execute();
@@ -25,7 +25,7 @@ if (isset($_POST['update_appointment'])) {
   $appointmentId = $_POST['appointment_id'];
   $newAppointmentDate = $_POST['appointment_date'];
 
-  $updateSql = "UPDATE appointment SET date = ? WHERE id = ?";
+  $updateSql = "UPDATE $table[APPOINTMENT] SET date = ? WHERE id = ?";
   $stmt = $conn->prepare($updateSql);
   $stmt->bind_param("si", $newAppointmentDate, $appointmentId);
   $stmt->execute();

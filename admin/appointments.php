@@ -7,7 +7,7 @@ if (!$_SESSION["loggedIn"]) {
   die;
 }
 
-$sql = "SELECT * FROM appointment";
+$sql = "SELECT * FROM $table[APPOINTMENT]";
 $data = $conn->query($sql);
 
 // Handle form submission to update the appointment date
@@ -15,7 +15,7 @@ if (isset($_POST['update_appointment'])) {
   $appointmentId = $_POST['appointment_id'];
   $newAppointmentDate = $_POST['appointment_date'];
 
-  $updateSql = "UPDATE appointment SET date = ? WHERE id = ?";
+  $updateSql = "UPDATE $table[APPOINTMENT] SET date = ? WHERE id = ?";
   $stmt = $conn->prepare($updateSql);
   $stmt->bind_param("si", $newAppointmentDate, $appointmentId);
   $stmt->execute();
