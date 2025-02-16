@@ -1,4 +1,4 @@
 <?php
-require_once("constants/table.php");
+require_once("table.php");
 
 ?>
