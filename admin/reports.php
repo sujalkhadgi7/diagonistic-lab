@@ -98,7 +98,7 @@ if (isset($_POST['update_appointment'])) {
                   <td><?php echo $row["phone"]; ?></td>
                   <td><?php echo $row["package"]; ?></td>
                   <td>
-                  <?php if (!$row["date"]): ?>
+                  <?php if (!$row["report"]): ?>
                     <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>" data-current-date="<?php echo $row["date"]; ?>">Set Appointment Date</button>
                     <?php else: echo $row["date"] ?> 
                     <?php endif; ?>
