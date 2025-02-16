@@ -17,10 +17,6 @@ $result = $stmt->get_result();
 $data = $result->fetch_all(MYSQLI_ASSOC);
 
 
-// $todaysDate = date("Y-m-d"); # or any other date
-// $query_today = $conn->prepare("SELECT * FROM appointment WHERE DATE(date) = ?");
-// $query_today->bind_param("s", $todaysDate);
-// $query_today->execute();
 
 
 
