@@ -1,9 +1,8 @@
 <?php
 
-require("../src/constants/index.php");
+require_once(__DIR__ . "/constants/index.php");
 
 
-echo "<script>console.log('Debug Objects: " . { "table": $table, "DIR": __DIR__} . "' );</script>";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
