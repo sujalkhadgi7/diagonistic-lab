@@ -1,6 +1,6 @@
 <?php
 
-require("./constants/index.php");
+require("/constants/index.php");
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
