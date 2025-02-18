@@ -1,49 +1,36 @@
 <?php
-$target_dir = "uploads/";
-$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
-$uploadOk = 1;
-$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+require '../src/db.php';
+session_start();
 
-// Check if image file is a actual image or fake image
-if(isset($_POST["submit"])) {
-  $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-  if($check !== false) {
-    echo "File is an image - " . $check["mime"] . ".";
-    $uploadOk = 1;
-  } else {
-    echo "File is not an image.";
-    $uploadOk = 0;
-  }
+if (!isset($_POST['appointment_id']) || !isset($_FILES['report_image'])) {
+    die("Invalid request.");
 }
 
-// Check if file already exists
-if (file_exists($target_file)) {
-  echo "Sorry, file already exists.";
-  $uploadOk = 0;
-}
+$appointmentId = $_POST['appointment_id'];
+// Process the uploaded file
+if ($_FILES['report_image']['error'] == UPLOAD_ERR_OK) {
+    $tmpName = $_FILES['report_image']['tmp_name'];
+    $fileName = basename($_FILES['report_image']['name']);
+    // You may want to create a unique file name to avoid collisions:
+    $newFileName = uniqid() . "_" . $fileName;
+    $uploadDir = "../uploads/";  // Make sure this directory exists and is writable
+    $uploadFile = $uploadDir . $newFileName;
 
-// Check file size
-if ($_FILES["fileToUpload"]["size"] > 500000) {
-  echo "Sorry, your file is too large.";
-  $uploadOk = 0;
-}
 
-// Allow certain file formats
-if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-&& $imageFileType != "gif" ) {
-  echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-  $uploadOk = 0;
-}
-
-// Check if $uploadOk is set to 0 by an error
-if ($uploadOk == 0) {
-  echo "Sorry, your file was not uploaded.";
-// if everything is ok, try to upload file
+    if (move_uploaded_file($tmpName, $uploadFile)) {
+        // Update the appointment record with the new file path
+        $sql = "UPDATE $table[APPOINTMENT] SET report = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $dbFilePath = $newFileName;
+        $stmt->bind_param("si", $dbFilePath, $appointmentId);
+        $stmt->execute();
+        $stmt->close();
+        header("Location: reports.php");
+        exit;
+    } else {
+        echo "File upload failed.";
+    }
 } else {
-  if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-    echo "The file ". htmlspecialchars( basename( $_FILES["fileToUpload"]["name"])). " has been uploaded.";
-  } else {
-    echo "Sorry, there was an error uploading your file.";
-  }
+    echo "Error uploading file.";
 }
 ?>

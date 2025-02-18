@@ -7,7 +7,6 @@ if (!$_SESSION["loggedIn"]) {
   die;
 }
 
-
 $currentDate = date("Y-m-d");
 $sql = "SELECT * FROM $table[APPOINTMENT] WHERE DATE(date) = ? ";
 $stmt = $conn->prepare($sql);
@@ -16,67 +15,92 @@ $stmt->execute();
 $result = $stmt->get_result();
 $data = $result->fetch_all(MYSQLI_ASSOC);
 
-
-
-
-
 // Handle form submission to update the appointment date
 if (isset($_POST['update_appointment'])) {
   $appointmentId = $_POST['appointment_id'];
   $newAppointmentDate = $_POST['appointment_date'];
 
   $updateSql = "UPDATE $table[APPOINTMENT] SET date = ? WHERE id = ?";
-  $stmt = $conn->prepare($updateSql);
-  $stmt->bind_param("si", $newAppointmentDate, $appointmentId);
-  $stmt->execute();
-  $stmt->close();
-  header("Refresh: 0"); 
+  $stmtUpdate = $conn->prepare($updateSql);
+  $stmtUpdate->bind_param("si", $newAppointmentDate, $appointmentId);
+  $stmtUpdate->execute();
+  $stmtUpdate->close();
+  header("Refresh: 0");
 }
-
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment Report</title>
-    <link rel="stylesheet" href="../assets/css/admin-dashboard.css"> <!-- Link to your existing CSS file -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment Report</title>
+  <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
+  <!-- Modal CSS (add if not in your admin-dashboard.css) -->
+  <style>
+    .modal {
+      display: none; 
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      border-radius: 5px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: #000;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>Admin Panel</h2>
-        <ul>
-            <li><a href="dashboard.php">Dashboard</a></li>
-            <li><a href="users.php">Users</a></li>
-            <li><a href="appointments.php">Appointments</a></li>
-            <li><a href="reports.php" class="active">Reports</a></li>
-            <li><a href="logout.php">Logout</a></li>
-        </ul>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>Admin Panel</h2>
+    <ul>
+      <li><a href="dashboard.php">Dashboard</a></li>
+      <li><a href="users.php">Users</a></li>
+      <li><a href="appointments.php">Appointments</a></li>
+      <li><a href="reports.php" class="active">Reports</a></li>
+      <li><a href="logout.php">Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">
+      <h2>Appointment Report</h2>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="header">
-            <h2>Appointment Report</h2>
-        </div>
+    <!-- Date Selection Form -->
+    <div class="card">
+      <div class="date-selector-container">
+        <label for="appointmentDate">Select Date:</label>
+        <input type="date" id="appointmentDate">
+        <button class="btn" onclick="fetchAppointments()">Get Appointments</button>
+      </div>
+    </div>
 
-        <!-- Date Selection Form -->
-        <div class="card">
-          <div class="date-selector-container">
-            <label for="appointmentDate">Select Date:</label>
-            <input type="date" id="appointmentDate">
-            <button class="btn" onclick="fetchAppointments()">Get Appointments</button>
-          </div>
-        </div>
-
-        <!-- Table to Display Appointments -->
-        <div class="card">
-        <div class="table-container">
+    <!-- Table to Display Appointments -->
+    <div class="card">
+      <div class="table-container">
         <table class="user-table">
           <thead>
             <tr>
@@ -89,8 +113,8 @@ if (isset($_POST['update_appointment'])) {
             </tr>
           </thead>
           <tbody id="appointmentsBody">
-            <?php if ($data->num_rows > 0): ?>
-              <?php while ($row = $data->fetch_assoc()): ?>
+            <?php if (count($data) > 0): ?>
+              <?php foreach ($data as $row): ?>
                 <tr>
                   <td><?php echo $row["id"]; ?></td>
                   <td><?php echo $row["name"]; ?></td>
@@ -98,13 +122,10 @@ if (isset($_POST['update_appointment'])) {
                   <td><?php echo $row["phone"]; ?></td>
                   <td><?php echo $row["package"]; ?></td>
                   <td>
-                  <?php if (!$row["report"]): ?>
-                    <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>" data-current-date="<?php echo $row["date"]; ?>">Set Appointment Date</button>
-                    <?php else: echo $row["date"] ?> 
-                    <?php endif; ?>
+                    <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>" data-current-date="<?php echo $row["date"]; ?>"><?php echo $row["report"] ? "View/Change Report" : "Upload Report"; ?></button>
                   </td>
                 </tr>
-              <?php endwhile; ?>
+              <?php endforeach; ?>
             <?php else: ?>
               <tr>
                 <td colspan="6">No appointments found.</td>
@@ -113,95 +134,108 @@ if (isset($_POST['update_appointment'])) {
           </tbody>
         </table>
       </div>
-        </div>
-    </div>
-
-    <!-- Modal to set appointment date -->
-  <div id="appointmentModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Set Appointment Date</h2>
-      <form action="appointments.php" method="POST">
-        <input type="hidden" id="appointment_id" name="appointment_id">
-        <label for="appointment_date">Choose a date and time:</label>
-        <input type="datetime-local" id="appointment_date" name="appointment_date" required>
-        <button type="submit" name="update_appointment">Update Appointment</button>
-      </form>
     </div>
   </div>
 
-    <script>
-        function fetchAppointments() {
+  <div id="appointmentModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Upload / View Report</h2>
+    <form action="upload-report.php" method="POST" enctype="multipart/form-data">
+      <!-- Hidden field to pass the appointment id -->
+      <input type="hidden" id="appointment_id" name="appointment_id">
+      
+      <!-- This div will be updated by JavaScript -->
+      <div id="reportDisplay"></div>
+      
+      <button type="submit" name="update_report">Save Report</button>
+    </form>
+  </div>
+</div>
 
-          var selectedDate = document.getElementById("appointmentDate").value;
-          var tableBody = document.getElementById("appointmentsBody");
-          
+  <script>
+    function fetchAppointments() {
+      var selectedDate = document.getElementById("appointmentDate").value;
+      var tableBody = document.getElementById("appointmentsBody");
+      
+      tableBody.innerHTML = "";
+      
+      if (!selectedDate) {
+        alert("Please select a date.");
+        return;
+      }
+      
+      fetch("fetch-appointments.php?date=" + selectedDate)
+        .then(response => response.json())
+        .then(data => {
           tableBody.innerHTML = "";
+          if (data.length > 0) {
+            let rows = data.map(app => {
+              return `<tr>
+                <td>${app.id}</td>
+                <td>${app.name}</td>
+                <td>${app.email}</td>
+                <td>${app.phone}</td>
+                <td>${app.package}</td>
+                <td>
+                  ${!app.report ? `<button class="openModalBtn" data-appointment-id="${app.id}">Set Report</button>` : `<button class="openModalBtn" data-appointment-id="${app.id}" data-report="${app.report}">View Report</button>`}
+                </td>
+              </tr>`;
+            }).join('');
+            tableBody.innerHTML = rows;
+            attachModalEvents();
+          } else {
+            tableBody.innerHTML = `<tr><td colspan="6" class="no-data">No appointments found</td></tr>`;
+          }
+        })
+        .catch(error => console.error("Error fetching data:", error));
+    }
 
-          console.log(selectedDate)
-          
-          if (!selectedDate) {
-              alert("Please select a date.");
-                return;
-            }
-
-            fetch("fetch-appointments.php?date=" + selectedDate)
-                .then(response => response.json())
-                .then(data => {
-                    tableBody.innerHTML = "";
-                    if (data.length > 0) {
-                      console.log(data);
-                      
-                      let row =data.map(app => {
-                        return `<tr>
-                            <td>${app.id}</td>
-                            <td>${app.name}</td>
-                            <td>${app.email}</td>
-                            <td>${app.phone}</td>
-                            <td>${app.package}</td>
-                            <td>
-                                ${!app.report ? `<button class="openModalBtn" data-appointment-id="${app.id}" data-current-date="${app.date}">Set Report </button>` : app.date}
-                            </td>
-                        </tr>`;})
-                    tableBody.innerHTML += row;
-                    } else {
-                        tableBody.innerHTML = `<tr><td colspan="6" class="no-data">No appointments found</td></tr>`;
-                    }
-                })
-                .catch(error => console.error("Error fetching data:", error));
-        }
-
-        // Get modal and open buttons
+    function attachModalEvents() {
     var modal = document.getElementById("appointmentModal");
     var btns = document.querySelectorAll(".openModalBtn");
-    var span = document.getElementsByClassName("close")[0];
-
-    // Open modal when the button is clicked
-    btns.forEach(function (btn) {
+    btns.forEach(function(btn) {
       btn.onclick = function() {
         var appointmentId = this.getAttribute("data-appointment-id");
-        var currentDate = this.getAttribute("data-current-date");
-
-        // Set the appointment ID and pre-fill current date if available
+        var report = this.getAttribute("data-report"); // may be empty or "null"
+        // Set the appointment ID in the hidden field
         document.getElementById("appointment_id").value = appointmentId;
-        document.getElementById("appointment_date").value = currentDate || "";
         
+        // If a report exists, show the image and allow file input to update it
+        if (report && report.trim() !== "" && report !== "null") {
+          document.getElementById("reportDisplay").innerHTML = `
+            <p>Current Report:</p>
+            <img src="../uploads/${report}" alt="Report Image" style="max-width:100%; height:auto; margin-bottom:10px;">
+            <p>Change Report (optional): <input type="file" name="report_image" accept="image/*"></p>
+          `;
+        } else {
+          // Otherwise, show only the file input for upload
+          document.getElementById("reportDisplay").innerHTML = `
+            <p>Upload Report:</p>
+            <input type="file" name="report_image" accept="image/*">
+          `;
+        }
         modal.style.display = "block";
       }
     });
+  }
 
-    // Close modal when the close button is clicked
-    span.onclick = function() {
+  // Attach events on page load
+  attachModalEvents();
+
+  // Close modal when the close button is clicked
+  var span = document.getElementsByClassName("close")[0];
+  span.onclick = function() {
+    document.getElementById("appointmentModal").style.display = "none";
+  };
+
+  // Close modal when clicking outside the modal content
+  window.onclick = function(event) {
+    var modal = document.getElementById("appointmentModal");
+    if (event.target == modal) {
       modal.style.display = "none";
     }
-
-    // Close modal when clicked outside the modal content
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-    </script>
-
+  };
+  </script>
 </body>
 </html>
