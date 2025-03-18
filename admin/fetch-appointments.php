@@ -21,4 +21,5 @@ if (isset($_GET['date']) && !empty($_GET['date'])) {
 
 $query->close();
 $conn->close();
+
 ?>

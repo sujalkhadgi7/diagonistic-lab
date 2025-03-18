@@ -1,10 +1,18 @@
 <?php
-require '../src/db.php';
+// Define the table variable
+$table = [
+    'APPOINTMENT' => 'appointments', // Replace with your actual table name
+    // Add other tables if necessary
+];
+
+// Include the database connection
+require_once '../src/db.php';  // Ensure the path to db.php is correct
+
 session_start();
 
 if (!$_SESSION["loggedIn"]) {
-  header('location: login.php');
-  die;
+    header('location: login.php');
+    die;
 }
 
 $sql = "SELECT * FROM $table[APPOINTMENT]";
@@ -12,19 +20,55 @@ $data = $conn->query($sql);
 
 // Handle form submission to update the appointment date
 if (isset($_POST['update_appointment'])) {
-  $appointmentId = $_POST['appointment_id'];
-  $newAppointmentDate = $_POST['appointment_date'];
+    $appointmentId = $_POST['appointment_id'];
+    $newAppointmentDate = $_POST['appointment_date'];
 
-  $updateSql = "UPDATE $table[APPOINTMENT] SET date = ? WHERE id = ?";
-  $stmt = $conn->prepare($updateSql);
-  $stmt->bind_param("si", $newAppointmentDate, $appointmentId);
-  $stmt->execute();
-  $stmt->close();
-  header("Refresh: 0"); 
+    // Update appointment in the database
+    $updateSql = "UPDATE $table[APPOINTMENT] SET date = ? WHERE id = ?";
+    $stmt = $conn->prepare($updateSql);
+    $stmt->bind_param("si", $newAppointmentDate, $appointmentId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Get the patient's email (fetch the email using appointment ID)
+    $getEmailSql = "SELECT email FROM $table[APPOINTMENT] WHERE id = ?";
+    $stmt = $conn->prepare($getEmailSql);
+    $stmt->bind_param("i", $appointmentId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $patientEmail = $row['email'];
+
+    // Prepare the email content
+    $subject = "Your Appointment is Confirmed!";
+    $message = "
+    <html>
+    <head>
+        <title>Appointment Confirmation</title>
+    </head>
+    <body>
+        <h2>Dear Customer,</h2>
+        <p>Your appointment has been successfully confirmed.</p>
+        <p><strong>Appointment Date:</strong> $newAppointmentDate</p>
+        <p>If you have any questions, feel free to contact us.</p>
+        <p>Thank you for choosing our Diagnostic Lab!</p>
+        <p>Best regards,</p>
+        <p>The Diagnostic Lab Team</p>
+    </body>
+    </html>
+    ";
+
+    // Include the PHPMailer code from send.php
+    require_once 'sendemail/send.php';  // Ensure the path is correct
+
+    // Call PHPMailer to send the email (using your send.php code logic)
+    sendAppointmentEmail($patientEmail, $subject, $message);
+    
+    header("Refresh: 0");  // Refresh the page after updating the appointment
 }
 
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,7 +149,6 @@ if (isset($_POST['update_appointment'])) {
       </form>
     </div>
   </div>
-
 
   <script>
     // Get modal and open buttons
