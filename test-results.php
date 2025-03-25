@@ -30,13 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Results - OS Diagnostic Lab</title>
+  <title>Test Results - OM Diagnostic Lab</title>
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
   <header>
     <div class="logo">
-      <h1>OS Diagnostic Lab</h1>
+      <h1>OM Diagnostic Lab</h1>
     </div>
     <nav>
       <ul>
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   </section>
 
   <footer>
-    <p>&copy; 2024 OS Diagnostic Lab | All Rights Reserved</p>
+    <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
   </footer>
 </body>
 </html>

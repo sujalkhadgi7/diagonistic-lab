@@ -1,9 +1,12 @@
+<?php
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OM Diagnostic Lab</title>
+    <title>OM Diagnostic Lab - Health Packages</title>
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
@@ -12,12 +15,12 @@
             <h1>OM Diagnostic Lab</h1>
         </div>
         <nav>
-             <ul>
-                <li><a href="." >Home</a></li>
-                <li><a href="about.php" >About Us</a></li>
-                <li><a href="health-package.php" >Health Packages</a></li>
-                <li><a href="contact.php" >Contact</a></li>
-                <li><a href="test-results.php" >Test Results</a></li>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="about.php">About Us</a></li>
+                <li><a href="health-package.php">Health Packages</a></li>
+                <li><a href="contact.php">Contact</a></li>
+                <li><a href="test-results.php">Test Results</a></li>
             </ul>
         </nav>
     </header>
@@ -44,17 +47,15 @@
                 ];
 
                 foreach ($packages as $name => $description) {
-                    echo "
-                    <div class='package-item'>
-                        <h3>$name</h3>
-                        <p>$description</p>
-                        <input type='checkbox' name='packages[]' value='$name'> Select
-                    </div>
-                    ";
+                    echo "<div class='package-item'>
+                            <input type='checkbox' name='packages[]' value='$name'> 
+                            <label><strong>$name</strong></label>
+                            <p>$description</p>
+                          </div>";
                 }
                 ?>
             </div>
-            <button type="submit" class="btn">Book Selected Packages</button>
+            <button type="submit" class="btn">Proceed to Booking</button>
         </form>
     </section>
 
@@ -63,6 +64,5 @@
     </footer>
 
     <?php require './src/db.php'; ?>
-
 </body>
 </html>

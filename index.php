@@ -8,13 +8,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OS Diagnostic Lab</title>
+    <title>OM Diagnostic Lab</title>
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
     <header>
         <div class="logo">
-            <h1>OS Diagnostic Lab</h1>
+            <h1>OM Diagnostic Lab</h1>
         </div>
         <nav>
             <ul>
@@ -29,7 +29,7 @@
 
     <!-- Home Section -->
     <section id="home" class="section-container active">
-        <h2>Welcome to OS Diagnostic Lab</h2>
+        <h2>Welcome to OM Diagnostic Lab</h2>
         <p>Providing quality health diagnostic services with a wide range of packages to meet your needs.</p>
         <div class="home-image-container">
             <img src="./assets/image/lab_photo.jpg" alt="Diagnostic Lab Image" class="home-image">
@@ -37,7 +37,7 @@
     </section>
 
     <footer>
-        <p>&copy; 2024 OS Diagnostic Lab | All Rights Reserved</p>
+        <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
     </footer>
     
     </body>
