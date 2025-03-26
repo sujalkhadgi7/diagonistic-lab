@@ -5,6 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OM Diagnostic Lab</title>
     <link rel="stylesheet" href="./assets/css/style.css">
+    <style>
+        /* Submit Button for Health Packages */
+.btn {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text color */
+    padding: 15px 25px; /* Add more padding for a larger button */
+    border: none;
+    border-radius: 10px; /* Rounded corners */
+    width: 100%;
+    font-size: 18px; /* Slightly larger text */
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow effect */
+    text-align: center;
+}
+
+/* Hover Effects */
+.btn:hover {
+    background: linear-gradient(145deg, #45a049, #4CAF50); /* Gradient hover effect */
+    transform: translateY(-2px); /* Slightly raise the button on hover */
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+/* Focus Effects */
+.btn:focus {
+    outline: none; /* Remove default focus outline */
+    box-shadow: 0 0 5px 2px rgba(76, 175, 80, 0.5); /* Green outline when focused */
+}
+
+/* Active Effects (when the button is clicked) */
+.btn:active {
+    transform: translateY(1px); /* Slightly lower the button when clicked */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Reduced shadow on click */
+}
+</style>
 </head>
 <body>
     <header>
@@ -25,7 +60,7 @@
     <!-- Health Packages Section -->
     <section id="packages" class="section-container">
         <h2>Our Test Packages</h2>
-        <form action="booking-form.php" method="GET">
+        <form action="booking-success.php" method="POST">
             <div class="package-list">
                 <?php
                 $packages = [

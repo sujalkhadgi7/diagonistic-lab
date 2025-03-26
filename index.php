@@ -1,5 +1,11 @@
-<?
-   
+<?php
+   require_once("./src/db.php");
+   session_start();
+
+   echo "<pre>";
+print_r($_SESSION);
+echo "</pre>";
+
 
 ?>
 
@@ -14,7 +20,9 @@
 <body>
     <header>
         <div class="logo">
+            
             <h1>OM Diagnostic Lab</h1>
+            <?php  echo isset($_SESSION["user_name"]) ? "Welcome " . $_SESSION["user_name"] : "";    ?>
         </div>
         <nav>
             <ul>

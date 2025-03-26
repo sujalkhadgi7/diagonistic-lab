@@ -7,30 +7,51 @@ if (!isset($_POST['appointment_id']) || !isset($_FILES['report_image'])) {
 }
 
 $appointmentId = $_POST['appointment_id'];
-// Process the uploaded file
-if ($_FILES['report_image']['error'] == UPLOAD_ERR_OK) {
-    $tmpName = $_FILES['report_image']['tmp_name'];
-    $fileName = basename($_FILES['report_image']['name']);
-    // You may want to create a unique file name to avoid collisions:
-    $newFileName = uniqid() . "_" . $fileName;
-    $uploadDir = "../uploads/";  // Make sure this directory exists and is writable
-    $uploadFile = $uploadDir . $newFileName;
 
+// Process the uploaded files
+if (isset($_FILES['report_image']) && count($_FILES['report_image']['name']) > 0) {
+    $uploadedFilePaths = [];
 
-    if (move_uploaded_file($tmpName, $uploadFile)) {
-        // Update the appointment record with the new file path
+    // Loop through each file
+    for ($i = 0; $i < count($_FILES['report_image']['name']); $i++) {
+        // Check for any errors during upload
+        if ($_FILES['report_image']['error'][$i] == UPLOAD_ERR_OK) {
+            $tmpName = $_FILES['report_image']['tmp_name'][$i];
+            $fileName = basename($_FILES['report_image']['name'][$i]);
+            // Generate a unique file name to avoid conflicts
+            $newFileName = uniqid() . "_" . $fileName;
+            $uploadDir = "../uploads/";  // Make sure this directory exists and is writable
+            $uploadFile = $uploadDir . $newFileName;
+
+            if (move_uploaded_file($tmpName, $uploadFile)) {
+                // Add the uploaded file path to the array
+                $uploadedFilePaths[] = $newFileName;
+            } else {
+                echo "File upload failed for file: $fileName";
+                continue;
+            }
+        } else {
+            echo "Error uploading file: " . $_FILES['report_image']['name'][$i];
+        }
+    }
+
+    // If we have uploaded files, update the appointment record
+    if (count($uploadedFilePaths) > 0) {
+        // Store the file paths as a comma-separated string
+        $dbFilePaths = implode(", ", $uploadedFilePaths);
+
         $sql = "UPDATE $table[APPOINTMENT] SET report = ? WHERE id = ?";
         $stmt = $conn->prepare($sql);
-        $dbFilePath = $newFileName;
-        $stmt->bind_param("si", $dbFilePath, $appointmentId);
+        $stmt->bind_param("si", $dbFilePaths, $appointmentId);
         $stmt->execute();
         $stmt->close();
+
         header("Location: reports.php");
         exit;
     } else {
-        echo "File upload failed.";
+        echo "No files were uploaded.";
     }
 } else {
-    echo "Error uploading file.";
+    echo "Error: No files were selected.";
 }
 ?>

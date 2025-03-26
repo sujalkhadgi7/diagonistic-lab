@@ -1,23 +1,57 @@
 <?php
-   require 'src/db.php';
-   
-   if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name'])) {
-       $name = mysqli_real_escape_string($conn, $_POST['name']);
-       $email = mysqli_real_escape_string($conn, $_POST['email']); 
-       $phone = mysqli_real_escape_string($conn, $_POST['phone']);       
-       $package = mysqli_real_escape_string($conn, $_POST['package']);      
+require 'src/db.php';
+session_start();
 
-       $sql = "INSERT INTO $table[APPOINTMENT] (name, email,phone, package, date) VALUES ('$name', '$email','$phone', '$package', NULL)";
+// Check if user is logged in by verifying session
 
-       if ($conn->query($sql) === TRUE) {
-           echo "New record created successfully";
-       } else {
-           echo "Error: " . $sql . "<br>" . $conn->error;
-       }
-   }
-   $conn->close();
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Escape user input for security
+
+    if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+    
+        // Escape the user_id for security
+        $user_id = mysqli_real_escape_string($conn, $user_id);
+    
+        // Fetch user information from the COSTUMERS table based on user_id
+        $sql = "SELECT * FROM $table[COSTUMERS] WHERE id = '$user_id' LIMIT 1";
+        $result = $conn->query($sql);
+    
+        if ($result && $result->num_rows > 0) {
+            // Fetch user data from the result
+            $user = $result->fetch_assoc();
+            $name = $user['name'];
+            $email = $user['email'];
+            $phone = $user['phone'];  // Assuming phone number is stored in the table
+        } else {
+            echo "No user found with the provided ID.";
+        }
+    } else {
+        header("Location: login.php");
+    }   
+
+    // Convert selected packages into a comma-separated string
+    if (isset($_POST['packages']) && is_array($_POST['packages'])) {
+        $packages = implode(",", $_POST['packages']);
+    } else {
+        $packages = "";  // If no package selected, set as an empty string
+    }
+
+    // Insert the data into the database
+    $sql = "INSERT INTO $table[APPOINTMENT] (name, email, phone, package, date) 
+            VALUES ('$name', '$email', '$phone', '$packages', NULL)";
+
+    if ($conn->query($sql) === TRUE) {
+        echo "New record created successfully";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+$conn->close();
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -45,11 +79,12 @@
 
     <!-- Home Section -->
     <section id="home" class="section-container active">
-        <h2>successfully filled the form</h2>
         <?php 
-            $name = $_POST['name'];
-
-            echo"<h2>$name</h2> "
+            if (isset($_SESSION["user_name"])) {
+                echo "<h2>Successfully filled the form</h2>";
+                $name = $_SESSION["user_name"];
+                echo "<h3>Thank you for your submission, $name.</h3>";
+            }
         ?>
         
     </section>
@@ -57,6 +92,5 @@
     <footer>
         <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
     </footer>
-    
-    </body>
+</body>
 </html>

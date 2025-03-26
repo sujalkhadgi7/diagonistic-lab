@@ -27,6 +27,39 @@ if (isset($_POST['update_appointment'])) {
   $stmtUpdate->close();
   header("Refresh: 0");
 }
+
+// Handle report upload
+if (isset($_POST['update_report'])) {
+  $appointmentId = $_POST['appointment_id'];
+
+  // Handle file upload
+  $uploadedFiles = [];
+  if (!empty($_FILES['report_images']['name'][0])) {
+    $fileCount = count($_FILES['report_images']['name']);
+    
+    for ($i = 0; $i < $fileCount; $i++) {
+      $fileTmpPath = $_FILES['report_images']['tmp_name'][$i];
+      $fileName = $_FILES['report_images']['name'][$i];
+      $filePath = "../uploads/" . $fileName;
+
+      // Move uploaded files to the "uploads" folder
+      if (move_uploaded_file($fileTmpPath, $filePath)) {
+        $uploadedFiles[] = $fileName;
+      }
+    }
+
+    if (count($uploadedFiles) > 0) {
+      $filePaths = implode(",", $uploadedFiles); // store file paths as comma-separated list
+      $updateSql = "UPDATE $table[APPOINTMENT] SET report = ? WHERE id = ?";
+      $stmtUpdate = $conn->prepare($updateSql);
+      $stmtUpdate->bind_param("si", $filePaths, $appointmentId);
+      $stmtUpdate->execute();
+      $stmtUpdate->close();
+      header("Refresh: 0");
+    }
+  }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -66,6 +99,9 @@ if (isset($_POST['update_appointment'])) {
     }
     .close:hover {
       color: #000;
+    }
+    .file-upload input[type="file"] {
+      padding: 5px;
     }
   </style>
 </head>
@@ -122,7 +158,9 @@ if (isset($_POST['update_appointment'])) {
                   <td><?php echo $row["phone"]; ?></td>
                   <td><?php echo $row["package"]; ?></td>
                   <td>
-                    <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>" data-current-date="<?php echo $row["date"]; ?>"><?php echo $row["report"] ? "View/Change Report" : "Upload Report"; ?></button>
+                    <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>" data-current-date="<?php echo $row["date"]; ?>">
+                      <?php echo $row["report"] ? "View/Change Report" : "Upload Report"; ?>
+                    </button>
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -137,34 +175,35 @@ if (isset($_POST['update_appointment'])) {
     </div>
   </div>
 
+  <!-- Modal for Uploading/View Reports -->
   <div id="appointmentModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>Upload / View Report</h2>
-    <form action="upload-report.php" method="POST" enctype="multipart/form-data">
-      <!-- Hidden field to pass the appointment id -->
-      <input type="hidden" id="appointment_id" name="appointment_id">
-      
-      <!-- This div will be updated by JavaScript -->
-      <div id="reportDisplay"></div>
-      
-      <button type="submit" name="update_report">Save Report</button>
-    </form>
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Upload / View Report</h2>
+      <form action="" method="POST" enctype="multipart/form-data">
+        <!-- Hidden field to pass the appointment id -->
+        <input type="hidden" id="appointment_id" name="appointment_id">
+        
+        <!-- This div will be updated by JavaScript -->
+        <div id="reportDisplay"></div>
+        
+        <button type="submit" name="update_report">Save Report</button>
+      </form>
+    </div>
   </div>
-</div>
 
   <script>
     function fetchAppointments() {
       var selectedDate = document.getElementById("appointmentDate").value;
       var tableBody = document.getElementById("appointmentsBody");
-      
+
       tableBody.innerHTML = "";
-      
+
       if (!selectedDate) {
         alert("Please select a date.");
         return;
       }
-      
+
       fetch("fetch-appointments.php?date=" + selectedDate)
         .then(response => response.json())
         .then(data => {
@@ -192,50 +231,53 @@ if (isset($_POST['update_appointment'])) {
     }
 
     function attachModalEvents() {
-    var modal = document.getElementById("appointmentModal");
-    var btns = document.querySelectorAll(".openModalBtn");
-    btns.forEach(function(btn) {
-      btn.onclick = function() {
-        var appointmentId = this.getAttribute("data-appointment-id");
-        var report = this.getAttribute("data-report"); // may be empty or "null"
-        // Set the appointment ID in the hidden field
-        document.getElementById("appointment_id").value = appointmentId;
-        
-        // If a report exists, show the image and allow file input to update it
-        if (report && report.trim() !== "" && report !== "null") {
-          document.getElementById("reportDisplay").innerHTML = `
-            <p>Current Report:</p>
-            <img src="../uploads/${report}" alt="Report Image" style="max-width:100%; height:auto; margin-bottom:10px;">
-            <p>Change Report (optional): <input type="file" name="report_image" accept="image/*"></p>
-          `;
-        } else {
-          // Otherwise, show only the file input for upload
-          document.getElementById("reportDisplay").innerHTML = `
-            <p>Upload Report:</p>
-            <input type="file" name="report_image" accept="image/*">
-          `;
-        }
-        modal.style.display = "block";
-      }
-    });
-  }
+      var modal = document.getElementById("appointmentModal");
+      var btns = document.querySelectorAll(".openModalBtn");
+      btns.forEach(function(btn) {
+        btn.onclick = function() {
+          var appointmentId = this.getAttribute("data-appointment-id");
+          var report = this.getAttribute("data-report"); // may be empty or "null"
+          document.getElementById("appointment_id").value = appointmentId;
 
-  // Attach events on page load
-  attachModalEvents();
-
-  // Close modal when the close button is clicked
-  var span = document.getElementsByClassName("close")[0];
-  span.onclick = function() {
-    document.getElementById("appointmentModal").style.display = "none";
-  };
-
-  // Close modal when clicking outside the modal content
-  window.onclick = function(event) {
-    var modal = document.getElementById("appointmentModal");
-    if (event.target == modal) {
-      modal.style.display = "none";
+          if (report && report.trim() !== "" && report !== "null") {
+            var reports = report.split(",");
+            var reportDisplayHtml = "<p>Current Reports:</p>";
+            reports.forEach(function(file) {
+              reportDisplayHtml += `<img src="../uploads/${file}" alt="Report Image" style="max-width:100%; height:auto; margin-bottom:10px;">`;
+            });
+            reportDisplayHtml += `
+              <p>Change Reports (optional):</p>
+              <input type="file" name="report_images[]" accept="image/*" multiple>
+            `;
+            document.getElementById("reportDisplay").innerHTML = reportDisplayHtml;
+          } else {
+            document.getElementById("reportDisplay").innerHTML = `
+              <p>Upload Reports:</p>
+              <input type="file" name="report_images[]" accept="image/*" multiple>
+            `;
+          }
+          modal.style.display = "block";
+        };
+      });
     }
-  };
+
+    // Attach events on page load
+    attachModalEvents();
+
+    // Close modal when the close button is clicked
+    var span = document.getElementsByClassName("close")[0];
+    span.onclick = function() {
+      document.getElementById("appointmentModal").style.display = "none";
+    };
+
+    // Close modal when clicking outside the modal content
+    window.onclick = function(event) {
+      var modal = document.getElementById("appointmentModal");
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
   </script>
+
 </body>
 </html>
