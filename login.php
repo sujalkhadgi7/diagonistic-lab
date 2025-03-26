@@ -14,6 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             session_start();
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['user_name'] = $row['name'];
+            $_SESSION['email']= $email;
             $_SESSION["loggedIn"] = true;
             header("Location: index.php");
             exit();

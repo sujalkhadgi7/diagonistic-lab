@@ -1,12 +1,6 @@
 <?php
    require_once("./src/db.php");
    session_start();
-
-   echo "<pre>";
-print_r($_SESSION);
-echo "</pre>";
-
-
 ?>
 
 <!DOCTYPE html>
@@ -16,13 +10,33 @@ echo "</pre>";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OM Diagnostic Lab</title>
     <link rel="stylesheet" href="./assets/css/style.css">
+    <style>
+        .login-btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .login-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <header>
         <div class="logo">
-            
             <h1>OM Diagnostic Lab</h1>
-            <?php  echo isset($_SESSION["user_name"]) ? "Welcome " . $_SESSION["user_name"] : "";    ?>
+            <?php  
+                if (isset($_SESSION["user_name"])) {
+                    echo "<p>Welcome, " . $_SESSION["user_name"] . "</p>";
+                } else {
+                    echo '<a href="login.php" class="login-btn">Login</a>';
+                }
+            ?>
         </div>
         <nav>
             <ul>
@@ -48,6 +62,5 @@ echo "</pre>";
         <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
     </footer>
     
-    </body>
+</body>
 </html>
-

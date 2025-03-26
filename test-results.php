@@ -1,27 +1,36 @@
 <?php
-require 'src/db.php';  // Adjust the path as needed
+require 'src/db.php';  
+session_start();
+
+if (!isset($_SESSION['email'])) {
+  header("Location: 401.php");
+}
+
+$email = $_SESSION['email'];  // Get email from session
 
 // Initialize variables
-$report = null;
+$reports = [];
 $message = "Here you can check the results of your tests once they are available.";
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get input values
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
+// Query for an appointment matching the email
+$stmt = $conn->prepare("SELECT * FROM appointment WHERE email = ? LIMIT 1");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$appointment = $result->fetch_assoc();
+$stmt->close();
 
-    // Query for an appointment matching the email and phone
-    $stmt = $conn->prepare("SELECT * FROM appointment WHERE email = ? AND phone = ? LIMIT 1");
-    $stmt->bind_param("ss", $email, $phone);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $appointment = $result->fetch_assoc();
-    $stmt->close();
-
-    // If an appointment is found and it has a report, use that report
-    if ($appointment && !empty($appointment['report'])) {
-        $report = $appointment['report'];
+// If an appointment is found and it has a report, process it
+if ($appointment) {
+    if (!empty($appointment['report'])) {
+        // Convert the comma-separated string into an array
+        $reports = explode(",", $appointment['report']);
+        $message = "Your appointment is found, and the test reports are available below.";
+        } else {
+        $message = "Your appointment is found, but no report is available yet.";
     }
+} else {
+    $message = "No appointment found for your account.";
 }
 ?>
 
@@ -53,32 +62,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   <section id="results" class="section-container">
     <h2>Test Results</h2>
 
+    <p><?php echo $message; ?></p>
 
-    <!-- Form for Email and Phone Input -->
-    <form method="POST" action="test-results.php" class="result-form">
-      <label for="email">Email:</label>
-      <input type="email" name="email" id="email" required>
-      
-      <label for="phone">Phone Number:</label>
-      <input type="text" name="phone" id="phone" required>
-      
-      <button type="submit">Check Test Results</button>
-    </form>
-    
-    <?php if ($_SERVER['REQUEST_METHOD'] == 'POST'): ?>
-      <?php if ($report): ?>
-        <div class="report">
-          <p>Your test result is available:</p>
-          <img src="./uploads/<?php echo $report; ?>" alt="Test Result Report" style="max-width:100%; height:auto;">
-        </div>
-      <?php else: ?>
-        <p><?php echo $message; ?></p>
-      <?php endif; ?>
-    <?php else: ?>
-      <p><?php echo $message; ?></p>
+    <?php if (!empty($reports)): ?>
+      <div class="report-gallery">
+        <p>Your test result images:</p>
+        <?php foreach ($reports as $report): ?>
+          <div class="report-item">
+            <img src="./uploads/<?php echo trim($report); ?>" alt="Test Report" style="max-width:100%; height:auto; margin-bottom: 10px;">
+          </div>
+        <?php endforeach; ?>
+      </div>
     <?php endif; ?>
-
-    
   </section>
 
   <footer>

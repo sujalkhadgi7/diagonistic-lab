@@ -6,6 +6,9 @@ if (!$_SESSION["loggedIn"]) {
   die;
 }
 
+
+
+
 // Get total users
 $sql = "SELECT COUNT(*) AS user_count FROM $table[USER]";
 $data = $conn->query($sql);
@@ -62,7 +65,7 @@ $todayAppointment = $row['today_appointment'];
 
   <div class="main-content">
     <div class="header">
-      <h1>Welcome, <?php echo $_SESSION['name']; ?></h1>
+      <h1>Welcome, <?php echo isset($_SESSION['name']) ? $_SESSION['name'] : 'Admin'; ?></h1>
       <p>Manage your lab system efficiently.</p>
     </div>
 
