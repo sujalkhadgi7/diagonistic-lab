@@ -23,12 +23,13 @@ if (isset($_GET["delete"])) {
 if (isset($_POST["add_user"])) {
     $name = $_POST["name"];
     $email = $_POST["email"];
-    $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
+    $username= $_POST["username"];
+    $password =$_POST["password"];
     $role = $_POST["role"];
 
-    $sql = "INSERT INTO user (Name, Gmail, Password, type) VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO user (Name, Gmail, username, Password, type) VALUES (?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssss", $name, $email, $password, $role);
+    $stmt->bind_param("sssss", $name, $email, $username, $password, $role);
     $stmt->execute();
     header("Location: users.php");
     exit();
@@ -87,6 +88,7 @@ $data = $conn->query($sql);
         <h2>Add New User</h2>
         <form method="POST">
             <input type="text" name="name" placeholder="Full Name" required>
+            <input type="text" name="username" placeholder="username" required>
             <input type="email" name="email" placeholder="Email" required>
             <input type="password" name="password" placeholder="Password" required>
             <select name="role" required>
