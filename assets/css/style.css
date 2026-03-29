@@ -3410,5 +3410,211 @@ body.admin-login {
     text-align: center;
 }
 
+/* Modern Package Modal Styling */
+.admin-panel .modal-package {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    flex-direction: center;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+    overflow-y: auto;
+}
+
+.admin-panel .modal-package.active {
+    display: flex !important;
+}
+
+.admin-panel .modal-package-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.4s ease-out;
+    margin: auto;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.admin-panel .modal-package-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 32px;
+    border-bottom: 1px solid #e5ede9;
+    position: sticky;
+    top: 0;
+    background: white;
+    border-radius: 16px 16px 0 0;
+}
+
+.admin-panel .modal-package-header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #113431;
+    font-weight: 700;
+}
+
+.admin-panel .modal-package-close {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 0;
+}
+
+.admin-panel .modal-package-close:hover {
+    color: #113431;
+}
+
+.admin-panel .modal-package-form {
+    padding: 32px;
+}
+
+.admin-panel .form-section {
+    margin-bottom: 32px;
+}
+
+.admin-panel .form-section:last-of-type {
+    margin-bottom: 0;
+}
+
+.admin-panel .section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #113431;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 18px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #0f766e;
+}
+
+.admin-panel .modal-errors {
+    padding: 16px 32px 0 32px;
+    margin-bottom: 12px;
+}
+
+.admin-panel .error-item {
+    padding: 10px 14px;
+    background: #fee2e2;
+    border-left: 4px solid #dc2626;
+    color: #b91c1c;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.admin-panel .modal-success {
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    color: #047857;
+    background: #d1fae5;
+    border-left: 4px solid #10b981;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.admin-panel .modal-package-footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #e5ede9;
+    flex-wrap: wrap;
+}
+
+.admin-panel .modal-package-footer .btn {
+    flex: 1;
+    min-width: 140px;
+}
+
+.admin-panel .btn-lg {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.admin-panel .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.admin-panel .card-header h2 {
+    margin: 0;
+}
+
+/* Responsive Mobile */
+@media (max-width: 920px) {
+    .admin-panel .modal-package-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .admin-panel .modal-package-header {
+        padding: 20px 24px;
+    }
+
+    .admin-panel .modal-package-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .admin-panel .modal-package-form {
+        padding: 24px;
+    }
+
+    .admin-panel .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .admin-panel .modal-package-footer {
+        flex-direction: column;
+    }
+
+    .admin-panel .modal-package-footer .btn {
+        width: 100%;
+    }
+
+    .admin-panel .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+
 
 /* Status badges and list styling */

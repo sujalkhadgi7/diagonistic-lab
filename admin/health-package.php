@@ -323,61 +323,136 @@ if ($catResult) {
       </div>
     <?php endif; ?>
 
-    <div class="card">
-      <h2><?php echo $isEditMode ? 'Edit Package' : 'Add New Package'; ?></h2>
-      <form method="POST" class="package-admin-form">
-        <input type="hidden" name="action" value="<?php echo $isEditMode ? 'update' : 'create'; ?>">
-
-        <div class="package-admin-grid">
-          <div>
-            <label for="pkg_id">Package ID</label>
-            <input id="pkg_id" type="number" min="1" name="id" required value="<?php echo h($form['id']); ?>"
-              <?php echo $isEditMode ? 'readonly' : ''; ?>>
-          </div>
-          <div>
-            <label for="pkg_name">Package Name</label>
-            <input id="pkg_name" type="text" name="name" required value="<?php echo h($form['name']); ?>">
-          </div>
-          <div>
-            <label for="pkg_category">Category</label>
-            <input id="pkg_category" type="text" name="category" required value="<?php echo h($form['category']); ?>">
-          </div>
-          <div>
-            <label for="pkg_pricing">Pricing</label>
-            <input id="pkg_pricing" type="number" min="0" name="pricing" required value="<?php echo h($form['pricing']); ?>">
-          </div>
-          <div>
-            <label for="pkg_popularity">Popularity (0-100)</label>
-            <input id="pkg_popularity" type="number" min="0" max="100" name="popularity" required
-              value="<?php echo h($form['popularity']); ?>">
-          </div>
-          <div>
-            <label for="pkg_tags">Tags JSON</label>
-            <input id="pkg_tags" type="text" name="tags" value="<?php echo h($form['tags']); ?>" placeholder='["blood", "diabetes"]'>
-          </div>
-          <div class="package-admin-full">
-            <label for="pkg_related">Related Packages JSON</label>
-            <input id="pkg_related" type="text" name="related_packages" value="<?php echo h($form['related_packages']); ?>" placeholder='[2, 3]'>
-          </div>
-          <div class="package-admin-full">
-            <label for="pkg_description">Description</label>
-            <textarea id="pkg_description" name="description" rows="4" required><?php echo h($form['description']); ?></textarea>
-          </div>
+    <!-- Edit/Create Package Modal -->
+    <div id="packageModal" class="modal-package">
+      <div class="modal-package-content">
+        <div class="modal-package-header">
+          <h2 id="modalTitle"><?php echo $isEditMode ? 'Edit Package' : 'Create New Package'; ?></h2>
+          <button type="button" class="modal-package-close" onclick="closePackageModal()" aria-label="Close modal">&times;</button>
         </div>
 
-        <div class="package-admin-actions">
-          <button type="submit"><?php echo $isEditMode ? 'Update Package' : 'Create Package'; ?></button>
-          <?php if ($isEditMode): ?>
-            <a class="btn" href="health-package.php">Cancel Edit</a>
-          <?php endif; ?>
-        </div>
-      </form>
+        <?php if (!empty($errors)): ?>
+          <div class="modal-errors">
+            <?php foreach ($errors as $error): ?>
+              <div class="error-item">⚠️ <?php echo h($error); ?></div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+        <?php if (!empty($success)): ?>
+          <div class="modal-success">✓ <?php echo h($success); ?></div>
+        <?php endif; ?>
+
+        <form method="POST" class="modal-package-form" id="packageForm">
+          <input type="hidden" name="action" value="<?php echo $isEditMode ? 'update' : 'create'; ?>">
+
+          <!-- Basic Information Section -->
+          <div class="form-section">
+            <h3 class="section-title">Basic Information</h3>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pkg_id">Package ID *</label>
+                <input id="pkg_id" type="number" min="1" name="id" required value="<?php echo h($form['id']); ?>"
+                  <?php echo $isEditMode ? 'readonly' : ''; ?>
+                  placeholder="e.g., 42">
+                <small>Unique identifier for the package</small>
+              </div>
+              <div class="form-group">
+                <label for="pkg_name">Package Name *</label>
+                <input id="pkg_name" type="text" name="name" required value="<?php echo h($form['name']); ?>"
+                  placeholder="e.g., Complete Blood Count">
+                <small>Display name of the test package</small>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pkg_category">Category *</label>
+                <input id="pkg_category" type="text" name="category" required value="<?php echo h($form['category']); ?>"
+                  placeholder="e.g., General, Diabetes, Thyroid">
+                <small>Organize packages by medical category</small>
+              </div>
+              <div class="form-group">
+                <label for="pkg_pricing">Pricing (₹) *</label>
+                <input id="pkg_pricing" type="number" min="0" name="pricing" required value="<?php echo h($form['pricing']); ?>"
+                  placeholder="e.g., 500">
+                <small>Package cost in Indian Rupees</small>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="pkg_description">Description *</label>
+              <textarea id="pkg_description" name="description" rows="4" required
+                placeholder="Detailed description of what this test package includes and detects..."><?php echo h($form['description']); ?></textarea>
+              <small>What the test measures and why it's important</small>
+            </div>
+          </div>
+
+          <!-- Advanced Settings Section -->
+          <div class="form-section">
+            <h3 class="section-title">Advanced Settings</h3>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pkg_popularity">Popularity Rating *</label>
+                <input id="pkg_popularity" type="number" min="0" max="100" name="popularity" required
+                  value="<?php echo h($form['popularity']); ?>">
+                <small>Popularity score (0-100). Used to rank packages.</small>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="pkg_tags">Tags (JSON Array)</label>
+              <input id="pkg_tags" type="text" name="tags" value="<?php echo h($form['tags']); ?>"
+                placeholder='e.g., ["blood", "diabetes", "glucose"]'>
+              <small>JSON array of keywords for searching. Format: ["tag1", "tag2"]</small>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="pkg_related">Related Packages (JSON Array)</label>
+              <input id="pkg_related" type="text" name="related_packages" value="<?php echo h($form['related_packages']); ?>"
+                placeholder='e.g., [2, 5, 8]'>
+              <small>IDs of related packages. Format: [1, 2, 3]</small>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="modal-package-footer">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <?php echo $isEditMode ? '✎ Update Package' : '+ Create Package'; ?>
+            </button>
+            <?php if ($isEditMode): ?>
+              <a class="btn btn-secondary btn-lg" href="health-package.php">Cancel</a>
+            <?php endif; ?>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Package List</h2>
+    <script>
+      function closePackageModal() {
+        document.getElementById('packageModal').style.display = 'none';
+      }
 
-      <!-- Search and Filter Form -->
+      function openPackageModal() {
+        document.getElementById('packageModal').style.display = 'flex';
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+        const modal = document.getElementById('packageModal');
+        if (event.target === modal) {
+          closePackageModal();
+        }
+      }
+    </script>
+
+    <div class="card">
+        <div class="card-header">
+          <h2>Package Management</h2>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openPackageModal()">+ Create New Package</button>
+        </div>
       <form method="GET" class="search-filter-form">
         <div class="search-filter-grid">
           <div>
