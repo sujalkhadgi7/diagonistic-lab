@@ -1,5 +1,5 @@
 <?php
-require_once("./src/db.php");
+require_once "./src/db.php";
 session_start();
 ?>
 
@@ -16,13 +16,7 @@ session_start();
 <body>
     <?php
     $currentPage = 'home';
-    if (isset($_SESSION['user_name'])) {
-        $safeUserName = htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8');
-        $headerLogoExtra = '<p>Welcome, ' . $safeUserName . '</p>';
-    } else {
-        $headerLogoExtra = '';
-    }
-    include __DIR__ . '/includes/header.php';
+    include_once __DIR__ . '/includes/header.php';
     ?>
 
     <!-- Home Section -->
@@ -30,11 +24,11 @@ session_start();
         <h2>Welcome to OM Diagnostic Lab</h2>
         <p>Providing quality health diagnostic services with a wide range of packages to meet your needs.</p>
         <div class="home-image-container">
-            <img src="./assets/image/lab_photo.jpg" alt="Diagnostic Lab Image" class="home-image">
+            <img src="./assets/image/lab_photo.jpg" alt="Lab" class="home-image">
         </div>
     </section>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include_once __DIR__ . '/includes/footer.php'; ?>
 
 </body>
 

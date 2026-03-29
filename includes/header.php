@@ -3,6 +3,14 @@ $currentPage = isset($currentPage) ? (string) $currentPage : '';
 $showNav = isset($showNav) ? (bool) $showNav : true;
 $headerLogoExtra = $headerLogoExtra ?? '';
 $isLoggedIn = isset($_SESSION['loggedIn']) ? (bool) $_SESSION['loggedIn'] : false;
+
+// Generate welcome message if user is logged in
+if (isset($_SESSION['user_name'])) {
+    $safeUserName = htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8');
+    $headerLogoExtra = '<p>Welcome, ' . $safeUserName . '</p>';
+} else {
+    $headerLogoExtra = '';
+}
 ?>
 <header>
     <div class="logo">

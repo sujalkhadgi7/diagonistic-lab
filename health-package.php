@@ -2,6 +2,10 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// Include database connection
+include_once __DIR__ . '/src/db.php';
+include_once __DIR__ . '/src/constants/table.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,6 +43,12 @@ if (session_status() === PHP_SESSION_NONE) {
                 <button type="button" id="packageReset" class="btn">Reset</button>
             </div>
             <p id="packageResultCount" aria-live="polite"></p>
+
+
+            <div class="recommended-section">
+                <h3>Recommended For You</h3>
+                <div id="recommendedPackages" class="package-list"></div>
+            </div>
             <div class="package-list">
                 <?php
                 $packages = [
@@ -163,7 +173,45 @@ if (session_status() === PHP_SESSION_NONE) {
 
                 ];
 
+                // Build mapping of package names to IDs for quick lookup
+                $packageNameToId = [];
+                foreach ($packages as $package) {
+                    $packageNameToId[$package['name']] = $package['id'];
+                }
+
+                // Fetch user's booking history from database
                 $bookingHistory = [];
+                if (isset($_SESSION['email']) && !empty($_SESSION['email'])) {
+                    $userEmail = $_SESSION['email'];
+
+                    // Query appointments for this user
+                    $query = "SELECT package FROM " . $table['APPOINTMENT'] . " WHERE email = ?";
+                    $stmt = $conn->prepare($query);
+
+                    if ($stmt) {
+                        $stmt->bind_param("s", $userEmail);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+
+                        if ($result && $result->num_rows > 0) {
+                            // Process each appointment
+                            while ($row = $result->fetch_assoc()) {
+                                // Split package CSV and map each to ID
+                                $packageNames = array_map('trim', explode(',', $row['package']));
+                                foreach ($packageNames as $packageName) {
+                                    if (!empty($packageName) && isset($packageNameToId[$packageName])) {
+                                        $bookingHistory[] = [
+                                            'packageId' => (int) $packageNameToId[$packageName],
+                                            'packageName' => $packageName
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+
+                        $stmt->close();
+                    }
+                }
 
                 foreach ($packages as $index => $package):
                     $id = (int) ($package['id'] ?? 0);
@@ -203,10 +251,7 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </form>
 
-        <div class="recommended-section">
-            <h3>Recommended For You</h3>
-            <div id="recommendedPackages" class="package-list"></div>
-        </div>
+
     </section>
 
     <?php include_once __DIR__ . '/includes/footer.php'; ?>
