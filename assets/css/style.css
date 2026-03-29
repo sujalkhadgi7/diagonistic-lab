@@ -496,16 +496,69 @@ button:hover,
     box-shadow: 0 8px 18px rgba(16, 38, 40, 0.1);
 }
 
-footer {
-    text-align: center;
-    color: #f2fffe;
-    background: linear-gradient(100deg, #134e4a, #0f766e);
-    padding: 18px 14px;
+.site-footer {
+    color: #e9fffc;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.08), transparent 30%),
+        linear-gradient(110deg, #0f4b49, #0f766e 58%, #125a57);
+    padding: 24px 14px 14px;
     margin-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-footer p {
+.site-footer .footer-inner {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.site-footer .footer-brand h3 {
+    margin: 0 0 6px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+    color: #f5fffe;
+}
+
+.site-footer .footer-brand p {
     margin: 0;
+    color: rgba(236, 255, 252, 0.9);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    max-width: 44ch;
+}
+
+.site-footer .footer-links,
+.site-footer .footer-contact {
+    display: grid;
+    gap: 8px;
+}
+
+.site-footer a {
+    color: #f2fffe;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.93rem;
+    opacity: 0.95;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.site-footer a:hover {
+    opacity: 1;
+    transform: translateX(2px);
+}
+
+.site-footer .footer-copy {
+    width: min(1120px, 100%);
+    margin: 18px auto 0;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(238, 255, 252, 0.9);
+    font-size: 0.85rem;
+    text-align: center;
 }
 
 @keyframes liftIn {
@@ -1003,5 +1056,31 @@ footer p {
     #packages form[action="booking-success.php"] .package-controls>#packageReset {
         grid-column: span 2;
         min-height: 42px;
+    }
+}
+
+@media (max-width: 860px) {
+    .site-footer .footer-inner {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .site-footer .footer-brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .site-footer {
+        padding: 18px 12px 12px;
+    }
+
+    .site-footer .footer-inner {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .site-footer .footer-copy {
+        margin-top: 14px;
+        font-size: 0.8rem;
     }
 }
