@@ -30,10 +30,10 @@ body {
     min-height: 100vh;
 }
 
-header {
+.site-header {
     background: linear-gradient(135deg, #134e4a 0%, #0f766e 60%, #115e59 100%);
     color: #f8ffff;
-    padding: 20px clamp(14px, 2.5vw, 34px);
+    padding: 16px clamp(14px, 2.5vw, 34px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: 0 8px 24px rgba(11, 58, 55, 0.22);
     position: sticky;
@@ -42,16 +42,26 @@ header {
     backdrop-filter: blur(3px);
 }
 
-header .logo {
+.site-header .header-inner {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+}
+
+.site-header .header-top {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 14px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
-header .logo h1 {
+.site-header .logo {
+    display: grid;
+    gap: 4px;
+}
+
+.site-header .logo h1 {
     margin: 0;
     font-size: clamp(1.35rem, 3vw, 2rem);
     font-family: 'Outfit', sans-serif;
@@ -59,12 +69,33 @@ header .logo h1 {
     letter-spacing: 0.02em;
 }
 
-header .logo p {
+.site-header .brand-meta {
     margin: 0;
+    color: rgba(240, 255, 254, 0.86);
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.site-header .welcome-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: rgba(7, 56, 58, 0.46);
+    color: #f8ffff;
+    font-size: 0.9rem;
     font-weight: 600;
 }
 
-header nav ul {
+.site-header .welcome-chip span {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.main-nav ul {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -73,7 +104,7 @@ header nav ul {
     padding: 0;
 }
 
-header nav ul li a,
+.main-nav ul li a,
 .login-btn {
     display: inline-flex;
     align-items: center;
@@ -89,17 +120,27 @@ header nav ul li a,
     transition: transform 0.2s ease, background 0.25s ease, border-color 0.25s ease;
 }
 
-header nav ul li a:hover,
+.main-nav ul li a:hover,
 .login-btn:hover {
     transform: translateY(-1px);
     background: rgba(8, 63, 66, 0.62);
     border-color: rgba(255, 255, 255, 0.55);
 }
 
-header nav ul li a[aria-current="page"] {
+.main-nav ul li a[aria-current="page"] {
     background: rgba(255, 255, 255, 0.26);
     border-color: rgba(255, 255, 255, 0.7);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+}
+
+.main-nav .auth-link {
+    background: rgba(249, 115, 22, 0.18);
+    border-color: rgba(255, 210, 180, 0.5);
+}
+
+.main-nav .auth-link:hover {
+    background: rgba(249, 115, 22, 0.32);
+    border-color: rgba(255, 219, 193, 0.74);
 }
 
 .section-container {
@@ -650,12 +691,12 @@ footer p {
 }
 
 @media (max-width: 860px) {
-    header .logo {
+    .site-header .header-top {
         align-items: flex-start;
         flex-direction: column;
     }
 
-    header {
+    .site-header {
         position: static;
     }
 
@@ -713,14 +754,19 @@ footer p {
         padding: 18px 14px;
     }
 
-    header nav ul {
+    .main-nav ul {
         gap: 8px;
     }
 
-    header nav ul li a,
+    .main-nav ul li a,
     .login-btn {
         padding: 8px 11px;
         font-size: 0.88rem;
+    }
+
+    .site-header .welcome-chip {
+        font-size: 0.84rem;
+        padding: 6px 10px;
     }
 
     #packages form {
