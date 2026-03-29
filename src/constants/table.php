@@ -4,5 +4,4 @@ $table = [
     "APPOINTMENT" => 'appointment',
     "COSTUMERS" => 'customers',
     "PACKAGES" => 'diagnostic_packages',
-]
-    ?>
+];

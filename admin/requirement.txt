@@ -1,4 +1,0 @@
-customer login page
-customer can setect different health packages
-customer should be able to view their bookings
-customer can view result without putting their info

@@ -9,10 +9,7 @@ if (!isset($_SESSION["loggedIn"]) || !$_SESSION["loggedIn"]) {
     exit;
 }
 
-$sql = "SELECT * FROM {$table['APPOINTMENT']}";
-$data = $conn->query($sql);
-
-// Flash messages (shown once)
+// Flash messages
 $flashError = $_SESSION['flash_error'] ?? '';
 $flashSuccess = $_SESSION['flash_success'] ?? '';
 unset($_SESSION['flash_error'], $_SESSION['flash_success']);
@@ -29,7 +26,7 @@ if (isset($_POST['update_appointment'])) {
     $stmt->execute();
     $stmt->close();
 
-    // Get the patient's email (fetch the email using appointment ID)
+    // Get the patient's email
     $getEmailSql = "SELECT email FROM {$table['APPOINTMENT']} WHERE id = ?";
     $stmt = $conn->prepare($getEmailSql);
     $stmt->bind_param("i", $appointmentId);
@@ -39,7 +36,6 @@ if (isset($_POST['update_appointment'])) {
     $patientEmail = $row['email'] ?? '';
 
     if ($patientEmail) {
-        // Prepare the email content
         $subject = "Your Appointment is Confirmed!";
         $message = "
         <html>
@@ -54,7 +50,6 @@ if (isset($_POST['update_appointment'])) {
         </body>
         </html>";
 
-        // Include the PHPMailer script
         require_once 'sendemail/send.php';
 
         $emailError = null;
@@ -102,6 +97,113 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
 
     $stmt->close();
 }
+
+// Get appointment statistics
+$totalAppointments = 0;
+$sql = "SELECT COUNT(*) AS count FROM {$table['APPOINTMENT']}";
+if (($result = $conn->query($sql)) && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $totalAppointments = (int) $row['count'];
+}
+
+$pendingAppointments = 0;
+$sql = "SELECT COUNT(*) AS count FROM {$table['APPOINTMENT']} WHERE date IS NULL";
+if (($result = $conn->query($sql)) && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $pendingAppointments = (int) $row['count'];
+}
+
+$scheduledAppointments = 0;
+$sql = "SELECT COUNT(*) AS count FROM {$table['APPOINTMENT']} WHERE date IS NOT NULL AND report IS NULL";
+if (($result = $conn->query($sql)) && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $scheduledAppointments = (int) $row['count'];
+}
+
+$completedAppointments = 0;
+$sql = "SELECT COUNT(*) AS count FROM {$table['APPOINTMENT']} WHERE report IS NOT NULL";
+if (($result = $conn->query($sql)) && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $completedAppointments = (int) $row['count'];
+}
+
+// Search, filter, and sorting
+$searchTerm = trim($_GET['search'] ?? '');
+$statusFilter = $_GET['status'] ?? '';
+$sortBy = $_GET['sort'] ?? 'recent';
+$currentPage = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+$itemsPerPage = 10;
+
+// Build WHERE clause
+$whereConditions = [];
+$queryParams = [];
+if ($searchTerm !== '') {
+    $whereConditions[] = "(name LIKE ? OR email LIKE ?)";
+    $queryParams[] = '%' . $searchTerm . '%';
+    $queryParams[] = '%' . $searchTerm . '%';
+}
+
+if ($statusFilter === 'pending') {
+    $whereConditions[] = "date IS NULL";
+} elseif ($statusFilter === 'scheduled') {
+    $whereConditions[] = "date IS NOT NULL AND report IS NULL";
+} elseif ($statusFilter === 'completed') {
+    $whereConditions[] = "report IS NOT NULL";
+}
+
+$whereClause = !empty($whereConditions) ? ' WHERE ' . implode(' AND ', $whereConditions) : '';
+
+// Determine sort order
+$sortMap = [
+    'name' => 'name ASC',
+    'name-desc' => 'name DESC',
+    'date' => 'date ASC',
+    'date-desc' => 'date DESC',
+    'recent' => 'id DESC',
+];
+$orderBy = $sortMap[$sortBy] ?? $sortMap['recent'];
+
+// Get total count
+$countSql = "SELECT COUNT(*) as total FROM {$table['APPOINTMENT']}" . $whereClause;
+$countStmt = $conn->prepare($countSql);
+if (!empty($queryParams)) {
+    $types = str_repeat('s', count($queryParams));
+    $countStmt->bind_param($types, ...$queryParams);
+}
+$countStmt->execute();
+$countResult = $countStmt->get_result();
+$countRow = $countResult->fetch_assoc();
+$totalItems = (int) $countRow['total'];
+$countStmt->close();
+
+$totalPages = ceil($totalItems / $itemsPerPage);
+if ($currentPage > $totalPages && $totalPages > 0) {
+    $currentPage = $totalPages;
+}
+
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Get paginated results
+$appointments = [];
+$listSql = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']}" . $whereClause . "
+            ORDER BY " . $orderBy . "
+            LIMIT ? OFFSET ?";
+$listStmt = $conn->prepare($listSql);
+$types = !empty($queryParams) ? str_repeat('s', count($queryParams)) . 'ii' : 'ii';
+$params = array_merge($queryParams, [$itemsPerPage, $offset]);
+if (!empty($params)) {
+    $listStmt->bind_param($types, ...$params);
+}
+$listStmt->execute();
+$listResult = $listStmt->get_result();
+$appointments = $listResult->fetch_all(MYSQLI_ASSOC);
+$listStmt->close();
+
+?>
+}
+
+$stmt->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -132,9 +234,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
 
     <main class="main-content">
         <div class="header">
-            <h1>Appointments</h1>
-            <p>Review booking records, assign dates, and share updates with patients.</p>
+            <h1>Appointments Management</h1>
+            <p>Track, schedule, and manage all patient appointments efficiently.</p>
         </div>
+
         <?php if ($flashError): ?>
             <div class="card admin-alert error">
                 <p><strong>Error:</strong> <?php echo htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8'); ?></p>
@@ -144,6 +247,97 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
                 <p><strong>Success:</strong> <?php echo htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
         <?php endif; ?>
+
+        <!-- Statistics Cards -->
+        <div class="dashboard-grid">
+            <div class="stat-card stat-card-total">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <h3>Total Appointments</h3>
+                    <p class="stat-number"><?php echo $totalAppointments; ?></p>
+                    <p class="stat-label">All appointments</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-card-pending">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-content">
+                    <h3>Pending</h3>
+                    <p class="stat-number"><?php echo $pendingAppointments; ?></p>
+                    <p class="stat-label">Awaiting date assignment</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-card-scheduled">
+                <div class="stat-icon">✓</div>
+                <div class="stat-content">
+                    <h3>Scheduled</h3>
+                    <p class="stat-number"><?php echo $scheduledAppointments; ?></p>
+                    <p class="stat-label">Confirmed, awaiting results</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-card-completed">
+                <div class="stat-icon">✔️</div>
+                <div class="stat-content">
+                    <h3>Completed</h3>
+                    <p class="stat-number"><?php echo $completedAppointments; ?></p>
+                    <p class="stat-label">Results delivered</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Form -->
+        <div class="card">
+            <form method="GET" class="search-filter-form">
+                <div class="search-filter-grid">
+                    <div>
+                        <label for="search_term">Search by Name/Email</label>
+                        <input id="search_term" type="text" name="search"
+                            value="<?php echo htmlspecialchars($searchTerm); ?>" placeholder="Patient name or email...">
+                    </div>
+                    <div>
+                        <label for="filter_status">Filter by Status</label>
+                        <select id="filter_status" name="status">
+                            <option value="">All Statuses</option>
+                            <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending
+                                (No Date)</option>
+                            <option value="scheduled" <?php echo $statusFilter === 'scheduled' ? 'selected' : ''; ?>>
+                                Scheduled (Awaiting Results)</option>
+                            <option value="completed" <?php echo $statusFilter === 'completed' ? 'selected' : ''; ?>>
+                                Completed (Results Delivered)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sort_by">Sort By</label>
+                        <select id="sort_by" name="sort">
+                            <option value="recent" <?php echo $sortBy === 'recent' ? 'selected' : ''; ?>>Most Recent
+                            </option>
+                            <option value="name" <?php echo $sortBy === 'name' ? 'selected' : ''; ?>>Name (A-Z)</option>
+                            <option value="name-desc" <?php echo $sortBy === 'name-desc' ? 'selected' : ''; ?>>Name (Z-A)
+                            </option>
+                            <option value="date" <?php echo $sortBy === 'date' ? 'selected' : ''; ?>>Appointment Date
+                                (Earliest)</option>
+                            <option value="date-desc" <?php echo $sortBy === 'date-desc' ? 'selected' : ''; ?>>Appointment
+                                Date (Latest)</option>
+                        </select>
+                    </div>
+                    <div class="search-filter-actions">
+                        <button type="submit" class="search-btn">Apply Filters</button>
+                        <a href="appointments.php" class="btn reset-btn">Clear All</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="results-summary">
+            <p>Showing
+                <?php echo count($appointments) > 0 ? (($currentPage - 1) * $itemsPerPage + 1) : 0; ?>–<?php echo min($currentPage * $itemsPerPage, $totalItems); ?>
+                of <?php echo $totalItems; ?> appointments</p>
+        </div>
+
+        <!-- Appointments Table -->
         <div class="card">
             <div class="table-container">
                 <table class="user-table">
@@ -154,44 +348,93 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Package</th>
+                            <th>Status</th>
                             <th>Appointment Date</th>
-                            <th>Results</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if ($data->num_rows > 0): ?>
-                            <?php while ($row = $data->fetch_assoc()): ?>
+                        <?php if (count($appointments) > 0): ?>
+                            <?php foreach ($appointments as $row): ?>
+                                <?php
+                                $status = 'pending';
+                                $statusIcon = '⏳';
+                                $statusClass = 'status-pending';
+                                if ($row['date'] && $row['report']) {
+                                    $status = 'Completed';
+                                    $statusIcon = '✔️';
+                                    $statusClass = 'status-completed';
+                                } elseif ($row['date']) {
+                                    $status = 'Scheduled';
+                                    $statusIcon = '✓';
+                                    $statusClass = 'status-scheduled';
+                                } else {
+                                    $status = 'Pending Date';
+                                    $statusIcon = '⏳';
+                                    $statusClass = 'status-pending';
+                                }
+                                ?>
                                 <tr>
-                                    <td><?php echo $row["id"]; ?></td>
-                                    <td><?php echo $row["name"]; ?></td>
-                                    <td><?php echo $row["email"]; ?></td>
-                                    <td><?php echo $row["phone"]; ?></td>
-                                    <td><?php echo $row["package"]; ?></td>
+                                    <td><?php echo (int) $row["id"]; ?></td>
+                                    <td><?php echo htmlspecialchars($row["name"]); ?></td>
+                                    <td><?php echo htmlspecialchars($row["email"]); ?></td>
+                                    <td><?php echo htmlspecialchars($row["phone"] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($row["package"]); ?></td>
                                     <td>
-                                        <?php if (!$row["date"]): ?>
-                                            <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>"
-                                                data-current-date="<?php echo $row["date"]; ?>">
-                                                Set Appointment Date
-                                            </button>
-                                        <?php else:
-                                            echo $row["date"]; ?>
+                                        <span class="status-badge <?php echo $statusClass; ?>">
+                                            <?php echo $statusIcon . ' ' . $status; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if ($row["date"]): ?>
+                                            <?php echo htmlspecialchars($row["date"]); ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">Not set</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
+                                        <button class="openModalBtn edit-btn"
+                                            data-appointment-id="<?php echo (int) $row["id"]; ?>"
+                                            data-current-date="<?php echo htmlspecialchars($row["date"] ?? ''); ?>">
+                                            Edit Date
+                                        </button>
                                         <a href="patient-results.php?appointment_id=<?php echo (int) $row['id']; ?>">
-                                            <button type="button">View Result</button>
+                                            <button type="button" class="view-btn">View</button>
                                         </a>
                                     </td>
                                 </tr>
-                            <?php endwhile; ?>
+                            <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7">No appointments found.</td>
+                                <td colspan="8" style="text-align: center; padding: 30px;">No appointments found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Controls -->
+            <?php if ($totalPages > 1): ?>
+                <div class="pagination">
+                    <?php if ($currentPage > 1): ?>
+                        <a href="?page=<?php echo $currentPage - 1; ?>&search=<?php echo urlencode($searchTerm); ?>&status=<?php echo urlencode($statusFilter); ?>&sort=<?php echo urlencode($sortBy); ?>"
+                            class="pagination-link">← Previous</a>
+                    <?php else: ?>
+                        <span class="pagination-link disabled">← Previous</span>
+                    <?php endif; ?>
+
+                    <div class="pagination-info">
+                        Page <?php echo $currentPage; ?> of <?php echo $totalPages; ?>
+                    </div>
+
+                    <?php if ($currentPage < $totalPages): ?>
+                        <a href="?page=<?php echo $currentPage + 1; ?>&search=<?php echo urlencode($searchTerm); ?>&status=<?php echo urlencode($statusFilter); ?>&sort=<?php echo urlencode($sortBy); ?>"
+                            class="pagination-link">Next →</a>
+                    <?php else: ?>
+                        <span class="pagination-link disabled">Next →</span>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </main>
 
