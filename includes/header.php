@@ -1,8 +1,12 @@
 <?php
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    session_start();
+}
+
 $currentPage = isset($currentPage) ? (string) $currentPage : '';
 $showNav = isset($showNav) ? (bool) $showNav : true;
 $headerLogoExtra = $headerLogoExtra ?? '';
-$isLoggedIn = isset($_SESSION['loggedIn']) ? (bool) $_SESSION['loggedIn'] : false;
+$isLoggedIn = !empty($_SESSION['loggedIn']) || isset($_SESSION['user_id']) || isset($_SESSION['user_name']);
 $ariaCurrentAttr = 'aria-current="page"';
 $mainNavId = 'mainSiteNav';
 
@@ -108,6 +112,16 @@ if (isset($_SESSION['user_name'])) {
 
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 860) {
+                    setOpen(false);
+                }
+            });
+
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth > 860 || !nav.classList.contains('is-open')) {
+                    return;
+                }
+
+                if (!header.contains(event.target)) {
                     setOpen(false);
                 }
             });

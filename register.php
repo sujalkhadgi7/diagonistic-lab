@@ -1,5 +1,9 @@
 <?php
-require_once("./src/db.php");
+require_once "./src/db.php";
+
+$feedbackMessage = '';
+$feedbackType = '';
+$registrationFailedMessage = 'Registration failed. Please try again.';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = mysqli_real_escape_string($conn, $_POST['name']);
@@ -9,180 +13,106 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check if email already exists
     $checkEmailSql = "SELECT id FROM $table[COSTUMERS] WHERE email = ?";
-    $stmt = $conn->prepare($checkEmailSql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
+    $checkStmt = $conn->prepare($checkEmailSql);
 
-    if ($stmt->num_rows > 0) {
-        echo "<p class='error-message'>Email already exists. Please use a different email or <a href='login.php'>Login here</a>.</p>";
-    } else {
-        // Insert new user if email does not exist
-        $stmt->close();
-        $sql = "INSERT INTO $table[COSTUMERS] (name, email,phone, password) VALUES (?,?,?,?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('ssss', $name, $email, $phone, $password);
-        
-        if ($stmt->execute()) {
-            echo "<p class='success-message'>Registration successful. <a href='login.php'>Login here</a></p>";
+    if ($checkStmt) {
+        $checkStmt->bind_param("s", $email);
+        $checkStmt->execute();
+        $checkStmt->store_result();
+
+        if ($checkStmt->num_rows > 0) {
+            $feedbackType = 'error';
+            $feedbackMessage = 'Email already exists. Please login with your account.';
         } else {
-            echo "<p class='error-message'>Error: " . $stmt->error . "</p>";
+            // Insert new user if email does not exist
+            $sql = "INSERT INTO $table[COSTUMERS] (name, email, phone, password) VALUES (?, ?, ?, ?)";
+            $insertStmt = $conn->prepare($sql);
+
+            if ($insertStmt) {
+                $insertStmt->bind_param('ssss', $name, $email, $phone, $password);
+
+                if ($insertStmt->execute()) {
+                    $feedbackType = 'success';
+                    $feedbackMessage = 'Registration successful. You can now login.';
+                } else {
+                    $feedbackType = 'error';
+                    $feedbackMessage = $registrationFailedMessage;
+                }
+
+                $insertStmt->close();
+            } else {
+                $feedbackType = 'error';
+                $feedbackMessage = $registrationFailedMessage;
+            }
         }
+
+        $checkStmt->close();
+    } else {
+        $feedbackType = 'error';
+        $feedbackMessage = $registrationFailedMessage;
     }
-    $stmt->close();
 }
 $conn->close();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <style>
-        /* General Styles */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Header */
-        header {
-            width: 100%;
-            background-color: #4CAF50;
-            padding: 15px 0;
-            text-align: center;
-        }
-
-        header .logo h1 {
-            color: white;
-            margin: 0;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        nav ul li {
-            display: inline;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* Registration Container */
-        .register-container {
-            background-color: white;
-            width: 100%;
-            max-width: 400px;
-            padding: 25px;
-            margin-top: 50px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        h2 {
-            color: #333;
-        }
-
-        /* Input Fields */
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .input-group input:focus {
-            border-color: ##4CAF50;
-            outline: none;
-            box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
-        }
-
-        /* Register Button */
-        .btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #4CAF50;
-        }
-
-        /* Success & Error Messages */
-        .success-message {
-            color: green;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .error-message {
-            color: red;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        /* Footer */
-        footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-        }
-    </style>
+    <title>Register | OM Diagnostic Lab</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
-<?php
+    <?php
+    $currentPage = '';
     $showNav = false;
-    include __DIR__ . '/includes/header.php';
-?>
+    include_once __DIR__ . '/includes/header.php';
+    ?>
 
-    <div class="register-container">
-        <h2>Create an Account</h2>
-        <form method="POST">
-            <div class="input-group">
-                <input type="text" name="name" placeholder="Full Name" autocomplete="off" required>
-            </div>
-            <div class="input-group">
-                <input type="email" name="email" placeholder="Email" autocomplete="off" required>
-            </div>
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Password" autocomplete="off" required>
-            </div>
-            <div class="input-group">
-                <input type="phone" name="phone" placeholder="Phone Number" autocomplete="off" required>
-            </div>
-            <button type="submit" class="btn">Register</button>
-        </form>
-        <p>Already have an account? <a href="login.php">Login</a></p>
-    </div>
+    <section id="registerPage" class="section-container auth-shell">
+        <section class="auth-panel" aria-labelledby="registerHeading">
+            <p class="auth-kicker">Create Account</p>
+            <h2 id="registerHeading">Join OM Diagnostic Lab</h2>
+            <p class="auth-subtitle">Register once to book appointments faster and track reports easily.</p>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+            <?php if (!empty($feedbackMessage)): ?>
+                <p class="<?php echo $feedbackType === 'success' ? 'auth-success' : 'auth-error'; ?>" role="alert">
+                    <?php echo htmlspecialchars($feedbackMessage, ENT_QUOTES, 'UTF-8'); ?>
+                </p>
+            <?php endif; ?>
+
+            <form method="POST" class="auth-form" novalidate>
+                <div class="input-group">
+                    <label for="registerName">Full Name</label>
+                    <input id="registerName" type="text" name="name" placeholder="Your full name" autocomplete="name"
+                        required>
+                </div>
+                <div class="input-group">
+                    <label for="registerEmail">Email</label>
+                    <input id="registerEmail" type="email" name="email" placeholder="you@example.com"
+                        autocomplete="email" required>
+                </div>
+                <div class="input-group">
+                    <label for="registerPassword">Password</label>
+                    <input id="registerPassword" type="password" name="password" placeholder="Create a password"
+                        autocomplete="new-password" required>
+                </div>
+                <div class="input-group">
+                    <label for="registerPhone">Phone Number</label>
+                    <input id="registerPhone" type="tel" name="phone" placeholder="98XXXXXXXX" autocomplete="tel"
+                        required>
+                </div>
+                <button type="submit" class="btn">Register</button>
+            </form>
+
+            <p class="auth-footnote">Already have an account? <a href="login.php">Login</a></p>
+        </section>
+    </section>
+
+    <?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
+
 </html>

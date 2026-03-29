@@ -305,6 +305,149 @@ body {
     border: 0;
 }
 
+:is(#loginPage, #registerPage).auth-shell {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(15, 118, 110, 0.12), transparent 42%),
+        radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.12), transparent 32%),
+        linear-gradient(180deg, #fbfffe, #f3fbfa);
+}
+
+:is(#loginPage, #registerPage) .auth-panel {
+    width: min(460px, 100%);
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #cee4e0;
+    border-radius: 18px;
+    padding: clamp(18px, 3vw, 26px);
+    box-shadow: 0 14px 28px rgba(12, 72, 67, 0.12);
+}
+
+:is(#loginPage, #registerPage) .auth-kicker {
+    margin: 0 0 8px;
+    color: #0f766e;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+:is(#loginPage, #registerPage) h2 {
+    margin-bottom: 6px;
+}
+
+:is(#loginPage, #registerPage) .auth-subtitle {
+    margin-top: 0;
+    margin-bottom: 14px;
+    color: #4a686c;
+}
+
+:is(#loginPage, #registerPage) .auth-form {
+    display: grid;
+    gap: 12px;
+}
+
+:is(#loginPage, #registerPage) .auth-form .input-group {
+    margin-bottom: 0;
+}
+
+:is(#loginPage, #registerPage) .auth-form label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+:is(#loginPage, #registerPage) .auth-form .btn {
+    width: 100%;
+    margin-top: 4px;
+}
+
+:is(#loginPage, #registerPage) .auth-error {
+    margin: 0 0 12px;
+    color: #9f1d1d;
+    background: #ffefef;
+    border: 1px solid #f8caca;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-weight: 600;
+}
+
+:is(#loginPage, #registerPage) .auth-success {
+    margin: 0 0 12px;
+    color: #14532d;
+    background: #edfdf2;
+    border: 1px solid #bdecc8;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-weight: 600;
+}
+
+:is(#loginPage, #registerPage) .auth-footnote {
+    margin: 14px 0 0;
+    color: #446366;
+    text-align: center;
+}
+
+:is(#loginPage, #registerPage) .auth-footnote a {
+    color: #0f766e;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+:is(#loginPage, #registerPage) .auth-footnote a:hover {
+    text-decoration: underline;
+}
+
+#error401 {
+    background:
+        radial-gradient(circle at 20% 0%, rgba(249, 115, 22, 0.15), transparent 35%),
+        radial-gradient(circle at 100% 100%, rgba(15, 118, 110, 0.13), transparent 30%),
+        linear-gradient(180deg, #fbfffe, #f4fbfa);
+}
+
+#error401 .error-panel {
+    width: min(560px, 100%);
+    margin: 0 auto;
+    text-align: center;
+    border: 1px solid #d4e8e4;
+    border-radius: 18px;
+    background: #ffffff;
+    padding: clamp(18px, 3vw, 30px);
+    box-shadow: 0 16px 30px rgba(10, 62, 58, 0.14);
+}
+
+#error401 .error-code {
+    margin: 0;
+    color: #dc2626;
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.2rem, 8vw, 4rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1;
+}
+
+#error401 h2 {
+    margin: 10px 0 8px;
+}
+
+#error401 .error-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#error401 .btn-outline {
+    background: #ffffff;
+    color: #0f766e;
+    border: 1px solid #88c7bf;
+}
+
+#error401 .btn-outline:hover {
+    color: #ffffff;
+    background: #0f766e;
+    border-color: #0f766e;
+}
+
 #home {
     text-align: center;
 }
@@ -1301,5 +1444,26 @@ button:hover,
     .site-footer .footer-copy {
         margin-top: 14px;
         font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 860px) {
+    :is(#loginPage, #registerPage) .auth-panel {
+        width: min(520px, 100%);
+    }
+}
+
+@media (max-width: 640px) {
+    :is(#loginPage, #registerPage) .auth-panel {
+        border-radius: 14px;
+        padding: 16px 14px;
+    }
+
+    #error401 .error-actions {
+        flex-direction: column;
+    }
+
+    #error401 .error-actions .btn {
+        width: 100%;
     }
 }
