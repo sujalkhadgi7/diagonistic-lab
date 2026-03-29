@@ -4,6 +4,7 @@ $showNav = isset($showNav) ? (bool) $showNav : true;
 $headerLogoExtra = $headerLogoExtra ?? '';
 $isLoggedIn = isset($_SESSION['loggedIn']) ? (bool) $_SESSION['loggedIn'] : false;
 $ariaCurrentAttr = 'aria-current="page"';
+$mainNavId = 'mainSiteNav';
 
 $navItems = [
     ['slug' => 'home', 'href' => '.', 'label' => 'Home'],
@@ -28,15 +29,24 @@ if (isset($_SESSION['user_name'])) {
                 <h1>OM Diagnostic Lab</h1>
                 <p class="brand-meta">Accurate diagnostics, compassionate care</p>
             </div>
-            <?php if (!empty($headerLogoExtra)): ?>
-                <div class="welcome-chip">
-                    <?php echo $headerLogoExtra; ?>
-                </div>
-            <?php endif; ?>
+            <div class="header-actions">
+                <?php if (!empty($headerLogoExtra)): ?>
+                    <div class="welcome-chip">
+                        <?php echo $headerLogoExtra; ?>
+                    </div>
+                <?php endif; ?>
+                <?php if ($showNav): ?>
+                    <button class="nav-toggle" type="button" aria-controls="<?php echo $mainNavId; ?>" aria-expanded="false" aria-label="Toggle navigation menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                <?php endif; ?>
+            </div>
         </div>
 
         <?php if ($showNav): ?>
-            <nav class="main-nav" aria-label="Main navigation">
+            <nav class="main-nav" id="<?php echo $mainNavId; ?>" aria-label="Main navigation">
                 <ul>
                     <?php foreach ($navItems as $item): ?>
                         <li>
@@ -56,3 +66,51 @@ if (isset($_SESSION['user_name'])) {
         <?php endif; ?>
     </div>
 </header>
+
+<?php if ($showNav): ?>
+    <script>
+        (function() {
+            var header = document.querySelector('.site-header');
+            if (!header) {
+                return;
+            }
+
+            var toggle = header.querySelector('.nav-toggle');
+            var nav = header.querySelector('.main-nav');
+            if (!toggle || !nav) {
+                return;
+            }
+
+            header.classList.add('nav-enhanced');
+
+            var setOpen = function(isOpen) {
+                nav.classList.toggle('is-open', isOpen);
+                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            };
+
+            toggle.addEventListener('click', function() {
+                setOpen(!nav.classList.contains('is-open'));
+            });
+
+            nav.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 860) {
+                        setOpen(false);
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    setOpen(false);
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 860) {
+                    setOpen(false);
+                }
+            });
+        })();
+    </script>
+<?php endif; ?>

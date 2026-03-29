@@ -95,6 +95,40 @@ body {
     white-space: nowrap;
 }
 
+.site-header .header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.site-header .nav-toggle {
+    display: none;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    background: rgba(8, 63, 66, 0.44);
+    color: #f8ffff;
+    border-radius: 10px;
+    width: 42px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.site-header .nav-toggle span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+}
+
+.site-header .nav-toggle:hover {
+    background: rgba(8, 63, 66, 0.62);
+    border-color: rgba(255, 255, 255, 0.66);
+}
+
 .main-nav ul {
     display: flex;
     flex-wrap: wrap;
@@ -850,8 +884,50 @@ button:hover,
 
 @media (max-width: 860px) {
     .site-header .header-top {
-        align-items: flex-start;
+        align-items: center;
+        flex-direction: row;
+        margin-bottom: 6px;
+    }
+
+    .site-header .header-actions {
+        margin-left: auto;
+    }
+
+    .site-header .nav-toggle {
+        display: inline-flex;
+    }
+
+    .site-header.nav-enhanced .main-nav {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transform: translateY(-6px);
+        transition: max-height 0.24s ease, opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .site-header.nav-enhanced .main-nav.is-open {
+        max-height: 520px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .site-header .main-nav ul {
+        width: 100%;
         flex-direction: column;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(6, 54, 56, 0.4);
+        backdrop-filter: blur(3px);
+    }
+
+    .site-header .main-nav ul li a,
+    .site-header .main-nav .auth-link {
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: 12px;
     }
 
     .site-header {
@@ -925,6 +1001,18 @@ button:hover,
     .site-header .welcome-chip {
         font-size: 0.84rem;
         padding: 6px 10px;
+    }
+
+    .site-header .logo h1 {
+        font-size: 1.26rem;
+    }
+
+    .site-header .brand-meta {
+        font-size: 0.8rem;
+    }
+
+    .site-header .main-nav ul {
+        padding: 8px;
     }
 
     #packages form {
