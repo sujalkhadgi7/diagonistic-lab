@@ -65,9 +65,6 @@ include_once __DIR__ . '/src/constants/table.php';
 
             <div class="package-result-meta">
                 <p id="packageResultCount" aria-live="polite"></p>
-                <button type="submit" class="btn" id="inlineBookButton" disabled>
-                    Book Selected
-                </button>
             </div>
 
 
