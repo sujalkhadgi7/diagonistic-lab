@@ -11,7 +11,7 @@
 <body>
     <?php
     $currentPage = 'health-package';
-    include __DIR__ . '/includes/header.php';
+    include_once __DIR__ . '/includes/header.php';
     ?>
 
     <!-- Health Packages Section -->
@@ -142,12 +142,21 @@
 
                 ];
 
-                foreach ($packages as $name => $description) {
-                    echo "
-                    <div class='package-item'>
-                        <h3>$name</h3>
-                        <p>$description</p>
-                        <input type='checkbox' name='packages[]' value='$name'> Select
+                foreach ($packages as $package):
+                    $name = htmlspecialchars((string) ($package['name'] ?? ''), ENT_QUOTES, 'UTF-8');
+                    $description = htmlspecialchars((string) ($package['description'] ?? ''), ENT_QUOTES, 'UTF-8');
+                    $category = htmlspecialchars(strtolower((string) ($package['category'] ?? '')), ENT_QUOTES, 'UTF-8');
+                    $price = (int) ($package['pricing'] ?? 0);
+                    ?>
+                    <div class="package-item" data-name="<?php echo strtolower($name); ?>"
+                        data-description="<?php echo strtolower($description); ?>" data-category="<?php echo $category; ?>"
+                        data-price="<?php echo $price; ?>">
+                        <h3><?php echo $name; ?></h3>
+                        <p><?php echo $description; ?></p>
+                        <p><strong>Price:</strong> Rs. <?php echo $price; ?></p>
+                        <label>
+                            <input type="checkbox" name="packages[]" value="<?php echo $name; ?>"> Select
+                        </label>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -155,7 +164,7 @@
         </form>
     </section>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include_once __DIR__ . '/includes/footer.php'; ?>
 
     <script>
         (function () {
