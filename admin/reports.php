@@ -69,41 +69,6 @@ if (isset($_POST['update_report'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Appointment Report</title>
   <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
-  <!-- Modal CSS (add if not in your admin-dashboard.css) -->
-  <style>
-    .modal {
-      display: none; 
-      position: fixed;
-      z-index: 9999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-      background-color: #fff;
-      margin: 15% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 300px;
-      border-radius: 5px;
-    }
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .close:hover {
-      color: #000;
-    }
-    .file-upload input[type="file"] {
-      padding: 5px;
-    }
-  </style>
 </head>
 <body>
 

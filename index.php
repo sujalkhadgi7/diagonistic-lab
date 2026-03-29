@@ -10,21 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OM Diagnostic Lab</title>
     <link rel="stylesheet" href="./assets/css/style.css">
-    <style>
-        .login-btn {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-        .login-btn:hover {
-            background-color: #0056b3;
-        }
-    </style>
 </head>
 <body>
     <header>
