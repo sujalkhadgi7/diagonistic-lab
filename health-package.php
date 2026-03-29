@@ -21,18 +21,43 @@
             <div class="package-list">
                 <?php
                 $packages = [
-                    "Lipid Profile" => "Test for cholesterol levels, including total cholesterol, LDL, HDL, and triglycerides.",
-                    "Basic Diabetes Package" => "Includes blood sugar tests, HbA1C, and insulin resistance test to monitor diabetes.",
-                    "Hemoglobin A1C" => "Test for tracking blood sugar control over the last 2-3 months, useful for diabetes management.",
-                    "Complete Blood Count" => "A comprehensive test to evaluate overall health and detect a variety of disorders.",
-                    "Thyroid Function Test" => "Tests to evaluate thyroid function, including TSH, T3, and T4 levels.",
-                    "Liver Function Test" => "Tests for liver enzymes, bilirubin levels, and proteins to assess liver health.",
-                    "Kidney Function Test" => "Tests including creatinine and urea to evaluate kidney health.",
-                    "Vitamin D Test" => "Test to measure vitamin D levels and ensure proper bone health.",
-                    "Iron Studies" => "Tests to check iron levels, including serum iron, ferritin, and TIBC.",
-                    "Allergy Panel" => "A comprehensive test to identify common allergens affecting the body.",
-                    "Cardiac Risk Markers" => "Tests to evaluate risk factors for cardiovascular diseases, including hs-CRP and homocysteine.",
-                    "Hormonal Profile" => "Tests to evaluate key hormones like estrogen, testosterone, and cortisol."
+                    "Lipid Profile" => [
+                        "description" => "Test for cholesterol levels, including total cholesterol, LDL, HDL, and triglycerides."
+                    ],
+                    "Basic Diabetes Package" => [
+                        "description" => "Includes blood sugar tests, HbA1C, and insulin resistance test to monitor diabetes."
+                    ],
+                    "Hemoglobin A1C" => [
+                        "description" => "Test for tracking blood sugar control over the last 2-3 months, useful for diabetes management."
+                    ],
+                    "Complete Blood Count" => [
+                        "description" => "A comprehensive test to evaluate overall health and detect a variety of disorders."
+
+                    ],
+                    "Thyroid Function Test" => [
+                        "description" => "Tests to evaluate thyroid function, including TSH, T3, and T4 levels."
+                    ],
+                    "Liver Function Test" => [
+                        "description" => "Tests for liver enzymes, bilirubin levels, and proteins to assess liver health."
+                    ],
+                    "Kidney Function Test" => [
+                        "description" => "Tests including creatinine and urea to evaluate kidney health."
+                    ],
+                    "Vitamin D Test" => [
+                        "description" => "Test to measure vitamin D levels and ensure proper bone health."
+                    ],
+                    "Iron Studies" => [
+                        "description" => "Tests to check iron levels, including serum iron, ferritin, and TIBC."
+                    ],
+                    "Allergy Panel" => [
+                        "description" => "A comprehensive test to identify common allergens affecting the body."
+                    ],
+                    "Cardiac Risk Markers" => [
+                        "description" => "Tests to evaluate risk factors for cardiovascular diseases, including hs-CRP and homocysteine."
+                    ],
+                    "Hormonal Profile" => [
+                        "description" => "Tests to evaluate key hormones like estrogen, testosterone, and cortisol."
+                    ]
                 ];
 
                 foreach ($packages as $name => $description) {
