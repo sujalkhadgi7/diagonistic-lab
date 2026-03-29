@@ -55,18 +55,23 @@ if (!empty($errors)) {
     exit;
 }
 
-// Build query
-$query = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']} WHERE date = ?";
+// Build query - use DATE() to compare only date part, not time
+$query = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']} WHERE DATE(date) = ?";
 $params = [$date];
 $paramTypes = 's';
 
 // Add status filter if provided
 if (!empty($status)) {
     if (strtolower($status) === 'pending') {
-        $query .= ' AND (report IS NULL OR report = "") AND (date IS NULL OR date = "")';
+        // Pending: has no date assigned yet
+        $query = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']} WHERE (date IS NULL OR date = '') AND (report IS NULL OR report = '')";
+        $paramTypes = '';
+        $params = [];
     } elseif (strtolower($status) === 'scheduled') {
-        $query .= ' AND (date IS NOT NULL AND date != "") AND (report IS NULL OR report = "")';
+        // Scheduled: has date but no report
+        $query .= ' AND (report IS NULL OR report = "")';
     } elseif (strtolower($status) === 'completed') {
+        // Completed: has report
         $query .= ' AND report IS NOT NULL AND report != ""';
     }
 }
@@ -97,16 +102,21 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // Fetch total count for pagination
-$countQuery = "SELECT COUNT(*) as total FROM {$table['APPOINTMENT']} WHERE date = ?";
+$countQuery = "SELECT COUNT(*) as total FROM {$table['APPOINTMENT']} WHERE DATE(date) = ?";
 $countParams = [$date];
 $countParamTypes = 's';
 
 if (!empty($status)) {
     if (strtolower($status) === 'pending') {
-        $countQuery .= ' AND (report IS NULL OR report = "") AND (date IS NULL OR date = "")';
+        // Pending: has no date assigned yet
+        $countQuery = "SELECT COUNT(*) as total FROM {$table['APPOINTMENT']} WHERE (date IS NULL OR date = '') AND (report IS NULL OR report = '')";
+        $countParamTypes = '';
+        $countParams = [];
     } elseif (strtolower($status) === 'scheduled') {
-        $countQuery .= ' AND (date IS NOT NULL AND date != "") AND (report IS NULL OR report = "")';
+        // Scheduled: has date but no report
+        $countQuery .= ' AND (report IS NULL OR report = "")';
     } elseif (strtolower($status) === 'completed') {
+        // Completed: has report
         $countQuery .= ' AND report IS NOT NULL AND report != ""';
     }
 }
