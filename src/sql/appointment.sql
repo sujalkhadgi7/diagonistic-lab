@@ -1,4 +1,19 @@
-CREATE TABLE `jobportal`.`appointment` (`name` TEXT NOT NULL , `email` TEXT NOT NULL , `package` TEXT NOT NULL , `date` DATE NULL , `id` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS `appointment` (
+  `id` INT AUTO_INCREMENT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(120) NOT NULL,
+  `phone` VARCHAR(20),
+  `package` VARCHAR(255) NOT NULL,
+  `date` DATETIME,
+  `report` LONGTEXT,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_appointment_email` (`email`),
+  KEY `idx_appointment_date` (`date`),
+  KEY `idx_appointment_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 CREATE TABLE IF NOT EXISTS diagnostic_packages (
 	id INT NOT NULL,
