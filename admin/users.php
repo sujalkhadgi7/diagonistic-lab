@@ -23,8 +23,8 @@ if (isset($_GET["delete"])) {
 if (isset($_POST["add_user"])) {
     $name = $_POST["name"];
     $email = $_POST["email"];
-    $username= $_POST["username"];
-    $password =$_POST["password"];
+    $username = $_POST["username"];
+    $password = $_POST["password"];
     $role = $_POST["role"];
 
     $sql = "INSERT INTO user (Name, Gmail, username, Password, type) VALUES (?, ?, ?, ?, ?)";
@@ -58,12 +58,14 @@ $data = $conn->query($sql);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users</title>
     <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
 </head>
+
 <body>
 
     <aside class="sidebar">
@@ -75,6 +77,7 @@ $data = $conn->query($sql);
                 <li><a href="appointments.php">Appointments</a></li>
                 <li><a href="health-package.php">Health Packages</a></li>
                 <li><a href="reports.php">Reports</a></li>
+                <li><a href="patient-results.php">Patient Results</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
@@ -110,26 +113,28 @@ $data = $conn->query($sql);
                     </tr>
                 </thead>
                 <tbody>
-                <?php if ($data->num_rows > 0): ?>
-                    <?php while ($row = $data->fetch_assoc()): ?>
+                    <?php if ($data->num_rows > 0): ?>
+                        <?php while ($row = $data->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo $row["ID"]; ?></td>
+                                <td><?php echo $row["Name"]; ?></td>
+                                <td><?php echo $row["Gmail"]; ?></td>
+                                <td><?php echo $row["type"]; ?></td>
+                                <td>
+                                    <a href="users.php?delete=<?php echo $row['ID']; ?>"
+                                        onclick="return confirm('Are you sure?')">
+                                        <button class="delete-btn">Delete</button>
+                                    </a>
+                                    <button class="edit-btn"
+                                        onclick="editUser('<?php echo $row['ID']; ?>', '<?php echo $row['Name']; ?>', '<?php echo $row['Gmail']; ?>', '<?php echo $row['type']; ?>')">Edit</button>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
                         <tr>
-                            <td><?php echo $row["ID"]; ?></td>
-                            <td><?php echo $row["Name"]; ?></td>
-                            <td><?php echo $row["Gmail"]; ?></td>
-                            <td><?php echo $row["type"]; ?></td>
-                            <td>
-                                <a href="users.php?delete=<?php echo $row['ID']; ?>" onclick="return confirm('Are you sure?')">
-                                    <button class="delete-btn">Delete</button>
-                                </a>
-                                <button class="edit-btn" onclick="editUser('<?php echo $row['ID']; ?>', '<?php echo $row['Name']; ?>', '<?php echo $row['Gmail']; ?>', '<?php echo $row['type']; ?>')">Edit</button>
-                            </td>
+                            <td colspan="5">No users found.</td>
                         </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="5">No users found.</td>
-                    </tr>
-                <?php endif; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -167,4 +172,5 @@ $data = $conn->query($sql);
     </script>
 
 </body>
+
 </html>

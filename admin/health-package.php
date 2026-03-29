@@ -9,6 +9,7 @@ if (!$_SESSION["loggedIn"]) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,16 +17,18 @@ if (!$_SESSION["loggedIn"]) {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
 </head>
+
 <body>
   <div class="sidebar">
     <h2>Admin Dashboard</h2>
     <ul>
-        <li><a href="dashboard.php">Dashboard</a></li>
-        <li><a href="users.php">Users</a></li>
-        <li><a href="appointments.php">Appointments</a></li>
-        <li><a href="health-package.php">Health Packages</a></li>
-        <li><a href="reports.php">Reports</a></li>
-        <li><a href="logout.php">Logout</a></li>
+      <li><a href="dashboard.php">Dashboard</a></li>
+      <li><a href="users.php">Users</a></li>
+      <li><a href="appointments.php">Appointments</a></li>
+      <li><a href="health-package.php">Health Packages</a></li>
+      <li><a href="reports.php">Reports</a></li>
+      <li><a href="patient-results.php">Patient Results</a></li>
+      <li><a href="logout.php">Logout</a></li>
     </ul>
   </div>
 
@@ -55,4 +58,5 @@ if (!$_SESSION["loggedIn"]) {
     </div>
   </div>
 </body>
+
 </html>

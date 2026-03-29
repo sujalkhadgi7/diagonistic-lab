@@ -1,7 +1,7 @@
 <?php
 
 // Include the database connection
-require_once '../src/db.php';  
+require_once '../src/db.php';
 session_start();
 
 if (!isset($_SESSION["loggedIn"]) || !$_SESSION["loggedIn"]) {
@@ -55,7 +55,7 @@ if (isset($_POST['update_appointment'])) {
         </html>";
 
         // Include the PHPMailer script
-        require_once 'sendemail/send.php';  
+        require_once 'sendemail/send.php';
 
         $emailError = null;
         $sent = sendAppointmentEmail($patientEmail, $subject, $message, $emailError);
@@ -69,10 +69,44 @@ if (isset($_POST['update_appointment'])) {
     header("Location: appointments.php");
     exit;
 }
+
+// Handle form submission to save a new appointment
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
+    $patientName = trim($_POST["patient-name"] ?? "");
+    $patientEmail = trim($_POST["patient-email"] ?? "");
+    $packageName = trim($_POST["package-name"] ?? "");
+
+    if (!isset($conn) || $conn->connect_error) {
+        die("Database connection is not available.");
+    }
+
+    if ($patientName === "" || $patientEmail === "" || $packageName === "") {
+        die("All fields are required.");
+    }
+
+    $stmt = $conn->prepare(
+        "INSERT INTO appointment (name, email, package, date) VALUES (?, ?, ?, NULL)"
+    );
+
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error);
+    }
+
+    $stmt->bind_param("sss", $patientName, $patientEmail, $packageName);
+
+    if (!$stmt->execute()) {
+        echo "Something went wrong: " . $stmt->error;
+    } else {
+        echo "Appointment saved successfully.";
+    }
+
+    $stmt->close();
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,6 +114,7 @@ if (isset($_POST['update_appointment'])) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
 </head>
+
 <body>
     <aside class="sidebar">
         <h2>Admin Panel</h2>
@@ -90,6 +125,7 @@ if (isset($_POST['update_appointment'])) {
                 <li><a href="appointments.php">Appointments</a></li>
                 <li><a href="health-package.php">Health Packages</a></li>
                 <li><a href="reports.php">Reports</a></li>
+                <li><a href="patient-results.php">Patient Results</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
@@ -117,6 +153,7 @@ if (isset($_POST['update_appointment'])) {
                             <th>Phone</th>
                             <th>Package</th>
                             <th>Appointment Date</th>
+                            <th>Results</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -130,19 +167,24 @@ if (isset($_POST['update_appointment'])) {
                                     <td><?php echo $row["package"]; ?></td>
                                     <td>
                                         <?php if (!$row["date"]): ?>
-                                            <button class="openModalBtn" 
-                                                    data-appointment-id="<?php echo $row["id"]; ?>" 
-                                                    data-current-date="<?php echo $row["date"]; ?>">
+                                            <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>"
+                                                data-current-date="<?php echo $row["date"]; ?>">
                                                 Set Appointment Date
                                             </button>
-                                        <?php else: echo $row["date"]; ?> 
+                                        <?php else:
+                                            echo $row["date"]; ?>
                                         <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <a href="patient-results.php?appointment_id=<?php echo (int) $row['id']; ?>">
+                                            <button type="button">View Result</button>
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6">No appointments found.</td>
+                                <td colspan="7">No appointments found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -187,7 +229,7 @@ if (isset($_POST['update_appointment'])) {
 
         // Open modal when the button is clicked
         btns.forEach(function (btn) {
-            btn.onclick = function() {
+            btn.onclick = function () {
                 var appointmentId = this.getAttribute("data-appointment-id");
                 var currentDate = this.getAttribute("data-current-date");
 
@@ -201,16 +243,17 @@ if (isset($_POST['update_appointment'])) {
         });
 
         // Close modal when clicking "X"
-        span.onclick = function() {
+        span.onclick = function () {
             modal.style.display = "none";
         }
 
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target == modal) {
                 modal.style.display = "none";
             }
         }
     </script>
 </body>
+
 </html>

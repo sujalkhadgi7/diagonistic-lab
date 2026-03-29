@@ -21,7 +21,7 @@ if ($data->num_rows > 0) {
 // get total Appointment 
 $sql = "SELECT COUNT(*) AS appointment_count FROM $table[APPOINTMENT]";
 $data = $conn->query($sql);
-$totalAppointment = 0; 
+$totalAppointment = 0;
 if ($data->num_rows > 0) {
   $result = $data->fetch_assoc();
   $totalAppointment = $result['appointment_count'];
@@ -43,6 +43,7 @@ $todayAppointment = $row['today_appointment'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,6 +51,7 @@ $todayAppointment = $row['today_appointment'];
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
 </head>
+
 <body>
   <div class="sidebar">
     <h2>Admin Dashboard</h2>
@@ -59,6 +61,7 @@ $todayAppointment = $row['today_appointment'];
       <li><a href="appointments.php">Appointments</a></li>
       <li><a href="health-package.php">Health Packages</a></li>
       <li><a href="reports.php">Reports</a></li>
+      <li><a href="patient-results.php">Patient Results</a></li>
       <li><a href="logout.php">Logout</a></li>
     </ul>
   </div>
@@ -84,9 +87,10 @@ $todayAppointment = $row['today_appointment'];
       </div>
       <div class="card">
         <h3>Health Packages Sold</h3>
-        <p><?php echo $totalAppointment;  ?></p>
+        <p><?php echo $totalAppointment; ?></p>
       </div>
     </div>
   </div>
 </body>
+
 </html>

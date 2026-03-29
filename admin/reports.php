@@ -36,7 +36,7 @@ if (isset($_POST['update_report'])) {
   $uploadedFiles = [];
   if (!empty($_FILES['report_images']['name'][0])) {
     $fileCount = count($_FILES['report_images']['name']);
-    
+
     for ($i = 0; $i < $fileCount; $i++) {
       $fileTmpPath = $_FILES['report_images']['tmp_name'][$i];
       $fileName = $_FILES['report_images']['name'][$i];
@@ -64,12 +64,14 @@ if (isset($_POST['update_report'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Appointment Report</title>
   <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
 </head>
+
 <body>
 
   <!-- Sidebar -->
@@ -80,6 +82,7 @@ if (isset($_POST['update_report'])) {
       <li><a href="users.php">Users</a></li>
       <li><a href="appointments.php">Appointments</a></li>
       <li><a href="reports.php" class="active">Reports</a></li>
+      <li><a href="patient-results.php">Patient Results</a></li>
       <li><a href="logout.php">Logout</a></li>
     </ul>
   </div>
@@ -123,7 +126,8 @@ if (isset($_POST['update_report'])) {
                   <td><?php echo $row["phone"]; ?></td>
                   <td><?php echo $row["package"]; ?></td>
                   <td>
-                    <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>" data-current-date="<?php echo $row["date"]; ?>">
+                    <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>"
+                      data-current-date="<?php echo $row["date"]; ?>">
                       <?php echo $row["report"] ? "View/Change Report" : "Upload Report"; ?>
                     </button>
                   </td>
@@ -148,10 +152,10 @@ if (isset($_POST['update_report'])) {
       <form action="" method="POST" enctype="multipart/form-data">
         <!-- Hidden field to pass the appointment id -->
         <input type="hidden" id="appointment_id" name="appointment_id">
-        
+
         <!-- This div will be updated by JavaScript -->
         <div id="reportDisplay"></div>
-        
+
         <button type="submit" name="update_report">Save Report</button>
       </form>
     </div>
@@ -198,8 +202,8 @@ if (isset($_POST['update_report'])) {
     function attachModalEvents() {
       var modal = document.getElementById("appointmentModal");
       var btns = document.querySelectorAll(".openModalBtn");
-      btns.forEach(function(btn) {
-        btn.onclick = function() {
+      btns.forEach(function (btn) {
+        btn.onclick = function () {
           var appointmentId = this.getAttribute("data-appointment-id");
           var report = this.getAttribute("data-report"); // may be empty or "null"
           document.getElementById("appointment_id").value = appointmentId;
@@ -207,7 +211,7 @@ if (isset($_POST['update_report'])) {
           if (report && report.trim() !== "" && report !== "null") {
             var reports = report.split(",");
             var reportDisplayHtml = "<p>Current Reports:</p>";
-            reports.forEach(function(file) {
+            reports.forEach(function (file) {
               reportDisplayHtml += `<img src="../uploads/${file}" alt="Report Image" style="max-width:100%; height:auto; margin-bottom:10px;">`;
             });
             reportDisplayHtml += `
@@ -231,12 +235,12 @@ if (isset($_POST['update_report'])) {
 
     // Close modal when the close button is clicked
     var span = document.getElementsByClassName("close")[0];
-    span.onclick = function() {
+    span.onclick = function () {
       document.getElementById("appointmentModal").style.display = "none";
     };
 
     // Close modal when clicking outside the modal content
-    window.onclick = function(event) {
+    window.onclick = function (event) {
       var modal = document.getElementById("appointmentModal");
       if (event.target == modal) {
         modal.style.display = "none";
@@ -245,4 +249,5 @@ if (isset($_POST['update_report'])) {
   </script>
 
 </body>
+
 </html>

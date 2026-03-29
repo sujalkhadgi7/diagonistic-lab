@@ -1,8 +1,6 @@
 <?
-    include("db.php")
+    include("db.php");
 
-    dd($_POST)
-    return 
     if(isset($_POST['submit'])) { 
        $patientName=$_POST['patient-name'];
        $patientEmail=$_POST['patient-email'];

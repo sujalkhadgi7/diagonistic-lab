@@ -1,26 +1,28 @@
 <?php
-   require_once("./src/db.php");
-   session_start();
+require_once("./src/db.php");
+session_start();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OM Diagnostic Lab</title>
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
     <?php
-        $currentPage = 'home';
-        if (isset($_SESSION['user_name'])) {
-            $safeUserName = htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8');
-            $headerLogoExtra = '<p>Welcome, ' . $safeUserName . '</p>';
-        } else {
-            $headerLogoExtra = '<a href="login.php" class="login-btn">Login</a>';
-        }
-        include __DIR__ . '/includes/header.php';
+    $currentPage = 'home';
+    if (isset($_SESSION['user_name'])) {
+        $safeUserName = htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8');
+        $headerLogoExtra = '<p>Welcome, ' . $safeUserName . '</p>';
+    } else {
+        $headerLogoExtra = '';
+    }
+    include __DIR__ . '/includes/header.php';
     ?>
 
     <!-- Home Section -->
@@ -33,6 +35,7 @@
     </section>
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
-    
+
 </body>
+
 </html>
