@@ -29,6 +29,19 @@ include_once __DIR__ . '/src/constants/table.php';
             Search, filter, compare, and book the right diagnostic packages for your needs.
         </p>
 
+
+        <div class="recommended-section" id="recommendedSection">
+            <div class="section-head">
+                <div>
+                    <h3 id="recommendedTitle">Recommended For You</h3>
+                    <p id="recommendedSubtitle" class="section-subtitle">
+                        Based on your previous bookings.
+                    </p>
+                </div>
+            </div>
+            <div id="recommendedPackages" class="package-list recommended-list"></div>
+        </div>
+
         <form action="booking-success.php" method="POST">
             <div class="package-controls">
                 <input type="search" id="packageSearch" placeholder="Search by test name or description"
@@ -53,17 +66,7 @@ include_once __DIR__ . '/src/constants/table.php';
                 <p id="packageResultCount" aria-live="polite"></p>
             </div>
 
-            <div class="recommended-section" id="recommendedSection">
-                <div class="section-head">
-                    <div>
-                        <h3 id="recommendedTitle">Recommended For You</h3>
-                        <p id="recommendedSubtitle" class="section-subtitle">
-                            Based on your previous bookings.
-                        </p>
-                    </div>
-                </div>
-                <div id="recommendedPackages" class="package-list recommended-list"></div>
-            </div>
+
 
             <div id="allPackagesList" class="package-list">
                 <?php
@@ -271,12 +274,6 @@ include_once __DIR__ . '/src/constants/table.php';
                     <span id="selectedPackageTotal">Total: Rs. 0</span>
                 </div>
                 <button type="submit" class="btn" id="quickBookButton" disabled>
-                    Book Selected Packages
-                </button>
-            </div>
-
-            <div class="booking-form-submit">
-                <button type="submit" class="btn" id="mainBookButton" disabled>
                     Book Selected Packages
                 </button>
             </div>
