@@ -1,5 +1,5 @@
 <?php
-require 'src/db.php';  
+require_once 'src/db.php';
 session_start();
 
 if (!isset($_SESSION['email'])) {
@@ -22,30 +22,32 @@ $stmt->close();
 
 // If an appointment is found and it has a report, process it
 if ($appointment) {
-    if (!empty($appointment['report'])) {
-        // Convert the comma-separated string into an array
-        $reports = explode(",", $appointment['report']);
-        $message = "Your appointment is found, and the test reports are available below.";
-        } else {
-        $message = "Your appointment is found, but no report is available yet.";
-    }
+  if (!empty($appointment['report'])) {
+    // Convert the comma-separated string into an array
+    $reports = explode(",", $appointment['report']);
+    $message = "Your appointment is found, and the test reports are available below.";
+  } else {
+    $message = "Your appointment is found, but no report is available yet.";
+  }
 } else {
-    $message = "No appointment found for your account.";
+  $message = "No appointment found for your account.";
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test Results - OM Diagnostic Lab</title>
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
   <?php
-    $currentPage = 'test-results';
-    include __DIR__ . '/includes/header.php';
+  $currentPage = 'test-results';
+  include_once __DIR__ . '/includes/header.php';
   ?>
 
   <!-- Test Results Section -->
@@ -59,13 +61,15 @@ if ($appointment) {
         <p>Your test result images:</p>
         <?php foreach ($reports as $report): ?>
           <div class="report-item">
-            <img src="./uploads/<?php echo trim($report); ?>" alt="Test Report" style="max-width:100%; height:auto; margin-bottom: 10px;">
+            <img src="./uploads/<?php echo trim($report); ?>" alt="Test Report"
+              style="max-width:100%; height:auto; margin-bottom: 10px;">
           </div>
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
   </section>
 
-  <?php include __DIR__ . '/includes/footer.php'; ?>
+  <?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
+
 </html>

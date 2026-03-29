@@ -1,5 +1,5 @@
 <?php
-require '../src/db.php';
+require_once '../src/db.php';
 session_start();
 if (!$_SESSION["loggedIn"]) {
   header('location: login.php');
@@ -18,7 +18,7 @@ if ($data->num_rows > 0) {
   $userCount = $result['user_count'];
 }
 
-// get total Appointment 
+// get total Appointment
 $sql = "SELECT COUNT(*) AS appointment_count FROM $table[APPOINTMENT]";
 $data = $conn->query($sql);
 $totalAppointment = 0;

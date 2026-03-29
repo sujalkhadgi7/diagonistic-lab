@@ -1,7 +1,8 @@
 <?php
 
-require '../src/db.php';
+require_once '../src/db.php';
 session_start();
+$redirectUsers = 'Location: users.php';
 
 if (!$_SESSION["loggedIn"]) {
     header('location: login.php');
@@ -15,7 +16,7 @@ if (isset($_GET["delete"])) {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
-    header("Location: users.php");
+    header($redirectUsers);
     exit();
 }
 
@@ -31,7 +32,7 @@ if (isset($_POST["add_user"])) {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sssss", $name, $email, $username, $password, $role);
     $stmt->execute();
-    header("Location: users.php");
+    header($redirectUsers);
     exit();
 }
 
@@ -46,7 +47,7 @@ if (isset($_POST["update_user"])) {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sssi", $name, $email, $role, $id);
     $stmt->execute();
-    header("Location: users.php");
+    header($redirectUsers);
     exit();
 }
 

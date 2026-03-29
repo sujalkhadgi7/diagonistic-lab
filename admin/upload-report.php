@@ -1,5 +1,5 @@
 <?php
-require '../src/db.php';
+require_once '../src/db.php';
 session_start();
 
 if (!isset($_POST['appointment_id']) || !isset($_FILES['report_image'])) {
@@ -28,7 +28,6 @@ if (isset($_FILES['report_image']) && count($_FILES['report_image']['name']) > 0
                 $uploadedFilePaths[] = $newFileName;
             } else {
                 echo "File upload failed for file: $fileName";
-                continue;
             }
         } else {
             echo "Error uploading file: " . $_FILES['report_image']['name'][$i];
@@ -36,7 +35,7 @@ if (isset($_FILES['report_image']) && count($_FILES['report_image']['name']) > 0
     }
 
     // If we have uploaded files, update the appointment record
-    if (count($uploadedFilePaths) > 0) {
+    if (!empty($uploadedFilePaths)) {
         // Store the file paths as a comma-separated string
         $dbFilePaths = implode(", ", $uploadedFilePaths);
 
@@ -54,4 +53,3 @@ if (isset($_FILES['report_image']) && count($_FILES['report_image']['name']) > 0
 } else {
     echo "Error: No files were selected.";
 }
-?>

@@ -1,5 +1,5 @@
 <?php
-require 'src/db.php';
+require_once 'src/db.php';
 session_start();
 
 // Check if user is logged in by verifying session
@@ -40,10 +40,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Insert the data into the database
-    $sql = "INSERT INTO $table[APPOINTMENT] (name, email, phone, package, date) 
+    $sql = "INSERT INTO $table[APPOINTMENT] (name, email, phone, package, date)
             VALUES ('$name', '$email', '$phone', '$packages', NULL)";
 
-    if ($conn->query($sql) === TRUE) {
+    if ($conn->query($sql) === true) {
         echo "New record created successfully";
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
@@ -66,7 +66,7 @@ $conn->close();
 <body>
     <?php
     $currentPage = 'health-package';
-    include __DIR__ . '/includes/header.php';
+    include_once __DIR__ . '/includes/header.php';
     ?>
 
     <!-- Home Section -->
@@ -81,7 +81,7 @@ $conn->close();
 
     </section>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 
 </html>

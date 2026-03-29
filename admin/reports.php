@@ -1,5 +1,5 @@
 <?php
-require '../src/db.php';
+require_once '../src/db.php';
 session_start();
 
 if (!$_SESSION["loggedIn"]) {
@@ -48,7 +48,7 @@ if (isset($_POST['update_report'])) {
       }
     }
 
-    if (count($uploadedFiles) > 0) {
+    if (!empty($uploadedFiles)) {
       $filePaths = implode(",", $uploadedFiles); // store file paths as comma-separated list
       $updateSql = "UPDATE $table[APPOINTMENT] SET report = ? WHERE id = ?";
       $stmtUpdate = $conn->prepare($updateSql);
