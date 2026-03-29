@@ -158,13 +158,10 @@ $conn->close();
     </style>
 </head>
 <body>
-
-
-<header>
-        <div class="logo">
-            <h1>OM Diagnostic Lab</h1>
-        </div>
-    </header>
+<?php
+    $showNav = false;
+    include __DIR__ . '/includes/header.php';
+?>
 
     <div class="register-container">
         <h2>Create an Account</h2>
@@ -186,8 +183,6 @@ $conn->close();
         <p>Already have an account? <a href="login.php">Login</a></p>
     </div>
 
-    <footer>
-        <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>

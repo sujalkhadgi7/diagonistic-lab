@@ -135,10 +135,10 @@ $conn->close();
     </style>
 </head>
 <body>
-
-<header>
-    <div class="logo"><h1>OM Diagnostic Lab</h1></div>
-</header>
+<?php
+    $showNav = false;
+    include __DIR__ . '/includes/header.php';
+?>
 
 <div class="form-container">
     <h2>Login</h2>
@@ -154,9 +154,7 @@ $conn->close();
     <p>Don't have an account? <a href="register.php">Register</a></p>
 </div>
 
-<footer>
-    <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
-</footer>
+<?php include __DIR__ . '/includes/footer.php'; ?>
 
 </body>
 </html>

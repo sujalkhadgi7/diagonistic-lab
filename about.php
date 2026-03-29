@@ -1,8 +1,3 @@
-<?php
-
-?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,20 +8,10 @@
 
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <h1>OM Diagnostic Lab</h1>
-        </div>
-        <nav>
-             <ul>
-                <li><a href="." >Home</a></li>
-                <li><a href="about.php" >About Us</a></li>
-                <li><a href="health-package.php" >Health Packages</a></li>
-                <li><a href="contact.php" >Contact</a></li>
-                <li><a href="test-results.php" >Test Results</a></li>
-            </ul>
-        </nav>
-    </header>
+    <?php
+        $currentPage = 'about';
+        include __DIR__ . '/includes/header.php';
+    ?>
 
      <!-- About Us Section -->
     <section id="about" class="section-container">
@@ -34,9 +19,7 @@
         <p>OM Diagnostic Lab is committed to providing comprehensive diagnostic services. We offer a wide range of health packages designed to meet your needs and ensure your well-being. Our team of medical experts ensures accurate results with state-of-the-art equipment.</p>
     </section>
 
-    <footer>
-        <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
 
     </body>
 </html>

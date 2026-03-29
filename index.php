@@ -12,27 +12,16 @@
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <h1>OM Diagnostic Lab</h1>
-            <?php  
-                if (isset($_SESSION["user_name"])) {
-                    echo "<p>Welcome, " . $_SESSION["user_name"] . "</p>";
-                } else {
-                    echo '<a href="login.php" class="login-btn">Login</a>';
-                }
-            ?>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="." >Home</a></li>
-                <li><a href="about.php" >About Us</a></li>
-                <li><a href="health-package.php" >Health Packages</a></li>
-                <li><a href="contact.php" >Contact</a></li>
-                <li><a href="test-results.php" >Test Results</a></li>
-            </ul>
-        </nav>
-    </header>
+    <?php
+        $currentPage = 'home';
+        if (isset($_SESSION['user_name'])) {
+            $safeUserName = htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8');
+            $headerLogoExtra = '<p>Welcome, ' . $safeUserName . '</p>';
+        } else {
+            $headerLogoExtra = '<a href="login.php" class="login-btn">Login</a>';
+        }
+        include __DIR__ . '/includes/header.php';
+    ?>
 
     <!-- Home Section -->
     <section id="home" class="section-container active">
@@ -43,9 +32,7 @@
         </div>
     </section>
 
-    <footer>
-        <p>&copy; 2024 OM Diagnostic Lab | All Rights Reserved</p>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
     
 </body>
 </html>
