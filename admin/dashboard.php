@@ -48,15 +48,14 @@ $todayAppointment = $row['today_appointment'];
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
-<body>
+<body class="admin-panel">
   <div class="sidebar">
     <h2>Admin Dashboard</h2>
     <ul>
-      <li><a href="dashboard.php">Dashboard</a></li>
+      <li><a href="dashboard.php" class="active">Dashboard</a></li>
       <li><a href="users.php">Users</a></li>
       <li><a href="appointments.php">Appointments</a></li>
       <li><a href="health-package.php">Health Packages</a></li>

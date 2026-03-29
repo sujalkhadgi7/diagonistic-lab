@@ -69,10 +69,10 @@ if (isset($_POST['update_report'])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Appointment Report</title>
-  <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
-<body>
+<body class="admin-panel">
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -81,6 +81,7 @@ if (isset($_POST['update_report'])) {
       <li><a href="dashboard.php">Dashboard</a></li>
       <li><a href="users.php">Users</a></li>
       <li><a href="appointments.php">Appointments</a></li>
+      <li><a href="health-package.php">Health Packages</a></li>
       <li><a href="reports.php" class="active">Reports</a></li>
       <li><a href="patient-results.php">Patient Results</a></li>
       <li><a href="logout.php">Logout</a></li>
@@ -212,7 +213,7 @@ if (isset($_POST['update_report'])) {
             var reports = report.split(",");
             var reportDisplayHtml = "<p>Current Reports:</p>";
             reports.forEach(function (file) {
-              reportDisplayHtml += `<img src="../uploads/${file}" alt="Report Image" style="max-width:100%; height:auto; margin-bottom:10px;">`;
+              reportDisplayHtml += `<img src="../uploads/${file}" alt="Report Image" class="report-preview-image">`;
             });
             reportDisplayHtml += `
               <p>Change Reports (optional):</p>

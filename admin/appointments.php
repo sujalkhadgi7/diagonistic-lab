@@ -111,18 +111,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Appointments</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
-<body>
+<body class="admin-panel">
     <aside class="sidebar">
         <h2>Admin Panel</h2>
         <nav>
             <ul>
                 <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="users.php">Users</a></li>
-                <li><a href="appointments.php">Appointments</a></li>
+                <li><a href="appointments.php" class="active">Appointments</a></li>
                 <li><a href="health-package.php">Health Packages</a></li>
                 <li><a href="reports.php">Reports</a></li>
                 <li><a href="patient-results.php">Patient Results</a></li>
@@ -132,13 +131,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
     </aside>
 
     <main class="main-content">
-        <h1>Appointments</h1>
+        <div class="header">
+            <h1>Appointments</h1>
+            <p>Review booking records, assign dates, and share updates with patients.</p>
+        </div>
         <?php if ($flashError): ?>
-            <div class="card">
+            <div class="card admin-alert error">
                 <p><strong>Error:</strong> <?php echo htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
         <?php elseif ($flashSuccess): ?>
-            <div class="card">
+            <div class="card admin-alert success">
                 <p><strong>Success:</strong> <?php echo htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
         <?php endif; ?>

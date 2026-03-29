@@ -29,10 +29,10 @@ if (isset($_POST['login-btn'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
-    <link rel="stylesheet" href="../assets/css/admin-style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
-<body>
+<body class="admin-login">
     <div class="login-container">
         <h2>Admin Login</h2>
         <form method="POST">

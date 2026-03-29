@@ -23,7 +23,7 @@ function parseReportFiles($reportValue)
       continue;
     }
 
-    if (!preg_match('/^[A-Za-z0-9._-]+\.(jpg|jpeg|png|gif|webp|pdf)$/i', $file)) {
+    if (!preg_match('/^[a-z0-9._-]+\.(jpg|jpeg|png|gif|webp|pdf)$/i', $file)) {
       continue;
     }
 
@@ -78,63 +78,10 @@ if ($appointmentId > 0) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Test Results</title>
-  <link rel="stylesheet" href="../assets/css/admin-dashboard.css">
-  <style>
-    .result-note {
-      margin-top: 8px;
-      color: #355377;
-      font-size: 0.95rem;
-    }
-
-    .search-form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .search-form input[type="text"] {
-      min-width: 260px;
-      flex: 1;
-    }
-
-    .report-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .report-entry {
-      border: 1px solid #d6e5f4;
-      border-radius: 10px;
-      padding: 8px;
-      background: #f7fbff;
-    }
-
-    .report-entry img {
-      width: 100%;
-      max-width: 280px;
-      border-radius: 8px;
-      border: 1px solid #d6e5f4;
-      margin-bottom: 8px;
-    }
-
-    .status-pill {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #fff;
-      background: #0b7285;
-    }
-
-    .status-pill.empty {
-      background: #9a3412;
-    }
-  </style>
+  <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
-<body>
+<body class="admin-panel">
   <aside class="sidebar">
     <h2>Admin Panel</h2>
     <nav>

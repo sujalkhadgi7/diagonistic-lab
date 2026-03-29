@@ -28,7 +28,7 @@ session_start();
                 <a href="health-package.php" class="cta-button">Browse Health Packages</a>
             </div>
             <div class="hero-image-area">
-                <img src="./assets/image/1.png" alt="Scientist in Modern Lab" class="featured-img">
+                <img src="./assets/image/hero.png" alt="Scientist in Modern Lab" class="featured-img">
             </div>
         </section>
 
@@ -61,7 +61,7 @@ session_start();
                         viability from collection to final report.</p>
                 </div>
                 <div class="detail-img">
-                    <img src="./assets/image/2.png" alt="Medical Lab Technology" class="featured-img">
+                    <img src="./assets/image/women.png" alt="Medical Lab Technology" class="featured-img">
                 </div>
             </div>
 
@@ -74,7 +74,7 @@ session_start();
                         dashboard to view, download, or share high-resolution PDF reports instantly.</p>
                 </div>
                 <div class="detail-img">
-                    <img src="./assets/image/3.png" alt="Viewing Digital Health Reports" class="featured-img">
+                    <img src="./assets/image/hands.png" alt="Viewing Digital Health Reports" class="featured-img">
                 </div>
             </div>
         </section>
