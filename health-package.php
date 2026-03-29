@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,17 +23,33 @@
     <section id="packages" class="section-container">
         <h2>Our Test Packages</h2>
         <form action="booking-success.php" method="POST">
+            <div class="package-controls">
+                <input type="search" id="packageSearch" placeholder="Search by test name or description"
+                    aria-label="Search packages">
+                <select id="packageCategory" aria-label="Filter by category">
+                    <option value="all">All Categories</option>
+                </select>
+                <select id="packageSort" aria-label="Sort packages">
+                    <option value="name-asc">Name: A to Z</option>
+                    <option value="name-desc">Name: Z to A</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="popularity-desc">Popularity</option>
+                </select>
+                <button type="button" id="packageReset" class="btn">Reset</button>
+            </div>
+            <p id="packageResultCount" aria-live="polite"></p>
             <div class="package-list">
                 <?php
                 $packages = [
 
-                    ["id" => 2, "name" => "Fasting Blood Sugar", "description" => "Measures blood glucose levels after fasting for 8–10 hours. Helps in early detection of diabetes and monitoring long-term sugar control.", "pricing" => 200, "category" => "Diabetes", "tags" => ["sugar", "diabetes"], "related_packages" => [3], "popularity" => 85],
+                    ["id" => 2, "name" => "Fasting Blood Sugar", "description" => "Measures blood glucose levels after fasting for 8-10 hours. Helps in early detection of diabetes and monitoring long-term sugar control.", "pricing" => 200, "category" => "Diabetes", "tags" => ["sugar", "diabetes"], "related_packages" => [3], "popularity" => 85],
 
                     ["id" => 3, "name" => "Postprandial Blood Sugar", "description" => "Checks blood sugar levels after meals. Useful for understanding how the body processes glucose and managing diabetes effectively.", "pricing" => 250, "category" => "Diabetes", "tags" => ["sugar"], "related_packages" => [2], "popularity" => 75],
 
                     ["id" => 4, "name" => "Random Blood Sugar", "description" => "Measures blood sugar at any time of the day. Helps in quick screening and identifying abnormal glucose levels.", "pricing" => 150, "category" => "Diabetes", "tags" => ["sugar"], "related_packages" => [2, 3], "popularity" => 70],
 
-                    ["id" => 5, "name" => "HbA1C Test", "description" => "Shows average blood sugar levels over the past 2–3 months. Helps in diagnosing and monitoring diabetes control.", "pricing" => 1200, "category" => "Diabetes", "tags" => ["diabetes"], "related_packages" => [2, 3], "popularity" => 90],
+                    ["id" => 5, "name" => "HbA1C Test", "description" => "Shows average blood sugar levels over the past 2-3 months. Helps in diagnosing and monitoring diabetes control.", "pricing" => 1200, "category" => "Diabetes", "tags" => ["diabetes"], "related_packages" => [2, 3], "popularity" => 90],
 
                     ["id" => 6, "name" => "Insulin Test", "description" => "Measures insulin hormone levels in blood. Helps detect insulin resistance and diabetes risk.", "pricing" => 2000, "category" => "Diabetes", "tags" => ["insulin"], "related_packages" => [5], "popularity" => 80],
 
@@ -142,15 +163,23 @@
 
                 ];
 
-                foreach ($packages as $package):
+                $bookingHistory = [];
+
+                foreach ($packages as $index => $package):
+                    $id = (int) ($package['id'] ?? 0);
                     $name = htmlspecialchars((string) ($package['name'] ?? ''), ENT_QUOTES, 'UTF-8');
                     $description = htmlspecialchars((string) ($package['description'] ?? ''), ENT_QUOTES, 'UTF-8');
                     $category = htmlspecialchars(strtolower((string) ($package['category'] ?? '')), ENT_QUOTES, 'UTF-8');
                     $price = (int) ($package['pricing'] ?? 0);
+                    $popularity = (int) ($package['popularity'] ?? 0);
+                    $related = array_map('intval', (array) ($package['related_packages'] ?? []));
+                    $relatedCsv = htmlspecialchars(implode(',', $related), ENT_QUOTES, 'UTF-8');
                     ?>
-                    <div class="package-item" data-name="<?php echo strtolower($name); ?>"
+                    <div class="package-item" data-id="<?php echo $id; ?>" data-index="<?php echo (int) $index; ?>"
+                        data-name="<?php echo strtolower($name); ?>"
                         data-description="<?php echo strtolower($description); ?>" data-category="<?php echo $category; ?>"
-                        data-price="<?php echo $price; ?>">
+                        data-price="<?php echo $price; ?>" data-popularity="<?php echo $popularity; ?>"
+                        data-related-packages="<?php echo $relatedCsv; ?>">
                         <h3><?php echo $name; ?></h3>
                         <p><?php echo $description; ?></p>
                         <p><strong>Price:</strong> Rs. <?php echo $price; ?></p>
@@ -160,29 +189,84 @@
                     </div>
                 <?php endforeach; ?>
             </div>
-            <button type="submit" class="btn">Book Selected Packages</button>
+
+            <div class="booking-quickbar" id="bookingQuickBar">
+                <div class="booking-quickbar-meta">
+                    <strong id="selectedPackageCount">0 package selected</strong>
+                    <span id="selectedPackageTotal">Total: Rs. 0</span>
+                </div>
+                <button type="submit" class="btn" id="quickBookButton" disabled>Book Selected Packages</button>
+            </div>
+
+            <div class="booking-form-submit">
+                <button type="submit" class="btn" id="mainBookButton" disabled>Book Selected Packages</button>
+            </div>
         </form>
+
+        <div class="recommended-section">
+            <h3>Recommended For You</h3>
+            <div id="recommendedPackages" class="package-list"></div>
+        </div>
     </section>
 
     <?php include_once __DIR__ . '/includes/footer.php'; ?>
 
     <script>
         (function () {
+            const packageList = document.querySelector('.package-list');
+            const recommendedContainer = document.getElementById('recommendedPackages');
             const searchInput = document.getElementById('packageSearch');
             const categorySelect = document.getElementById('packageCategory');
             const sortSelect = document.getElementById('packageSort');
-            const packageList = document.querySelector('.package-list');
+            const resetButton = document.getElementById('packageReset');
+            const resultCount = document.getElementById('packageResultCount');
+            const selectedPackageCount = document.getElementById('selectedPackageCount');
+            const selectedPackageTotal = document.getElementById('selectedPackageTotal');
+            const quickBookButton = document.getElementById('quickBookButton');
+            const mainBookButton = document.getElementById('mainBookButton');
+            const bookingHistory = <?php echo json_encode($bookingHistory, JSON_UNESCAPED_UNICODE); ?>;
 
-            if (!searchInput || !categorySelect || !sortSelect || !packageList) {
+            if (!packageList || !recommendedContainer) {
                 return;
             }
 
             const cards = Array.from(packageList.querySelectorAll('.package-item'));
             const noData = document.createElement('div');
             noData.className = 'no-package-match';
-            noData.textContent = 'No packages match your filter.';
+            noData.textContent = 'No packages match your filters.';
+
+            function populateCategories() {
+                if (!categorySelect) {
+                    return;
+                }
+
+                const existingValues = new Set(
+                    Array.from(categorySelect.options).map((option) => option.value)
+                );
+
+                const categories = new Set(
+                    cards.map((card) => card.dataset.category || '').filter(Boolean)
+                );
+
+                Array.from(categories)
+                    .sort((a, b) => a.localeCompare(b))
+                    .forEach((categoryValue) => {
+                        if (existingValues.has(categoryValue)) {
+                            return;
+                        }
+
+                        const option = document.createElement('option');
+                        option.value = categoryValue;
+                        option.textContent = categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1);
+                        categorySelect.appendChild(option);
+                    });
+            }
 
             function applyFilters() {
+                if (!searchInput || !categorySelect || !sortSelect) {
+                    return;
+                }
+
                 const term = searchInput.value.trim().toLowerCase();
                 const category = categorySelect.value;
                 const sort = sortSelect.value;
@@ -193,7 +277,7 @@
                     const cardCategory = card.dataset.category || '';
 
                     const matchesSearch = !term || name.includes(term) || description.includes(term);
-                    const matchesCategory = category === 'all' || cardCategory === category.toLowerCase();
+                    const matchesCategory = category === 'all' || cardCategory === category;
 
                     return matchesSearch && matchesCategory;
                 });
@@ -203,6 +287,10 @@
                     const nameB = (b.dataset.name || '').toLowerCase();
                     const priceA = parseInt(a.dataset.price || '0', 10);
                     const priceB = parseInt(b.dataset.price || '0', 10);
+                    const popularityA = parseInt(a.dataset.popularity || '0', 10);
+                    const popularityB = parseInt(b.dataset.popularity || '0', 10);
+                    const indexA = parseInt(a.dataset.index || '0', 10);
+                    const indexB = parseInt(b.dataset.index || '0', 10);
 
                     if (sort === 'name-desc') {
                         return nameB.localeCompare(nameA);
@@ -213,7 +301,15 @@
                     if (sort === 'price-desc') {
                         return priceB - priceA;
                     }
-                    return nameA.localeCompare(nameB);
+                    if (sort === 'popularity-desc') {
+                        return popularityB - popularityA;
+                    }
+
+                    // Default sort keeps the seeded order for predictable UI.
+                    if (sort === 'name-asc') {
+                        return nameA.localeCompare(nameB);
+                    }
+                    return indexA - indexB;
                 });
 
                 cards.forEach((card) => {
@@ -232,12 +328,210 @@
                 if (hasMatch && packageList.contains(noData)) {
                     noData.remove();
                 }
+
+                if (resultCount) {
+                    resultCount.textContent = `${filtered.length} package(s) shown`;
+                }
             }
 
-            searchInput.addEventListener('input', applyFilters);
-            categorySelect.addEventListener('change', applyFilters);
-            sortSelect.addEventListener('change', applyFilters);
-            applyFilters();
+            function updateBookingSummary() {
+                const selected = cards.filter((card) => {
+                    const checkbox = card.querySelector('input[type="checkbox"]');
+                    return checkbox ? checkbox.checked : false;
+                });
+
+                const count = selected.length;
+                const total = selected.reduce((sum, card) => {
+                    return sum + parseInt(card.dataset.price || '0', 10);
+                }, 0);
+
+                if (selectedPackageCount) {
+                    selectedPackageCount.textContent = `${count} package${count === 1 ? '' : 's'} selected`;
+                }
+
+                if (selectedPackageTotal) {
+                    selectedPackageTotal.textContent = `Total: Rs. ${total}`;
+                }
+
+                if (quickBookButton) {
+                    quickBookButton.disabled = count === 0;
+                }
+
+                if (mainBookButton) {
+                    mainBookButton.disabled = count === 0;
+                }
+            }
+
+            function parsePackagesFromDom() {
+                const cards = Array.from(packageList.querySelectorAll('.package-item'));
+
+                return cards.map((card) => {
+                    const relatedPackages = (card.dataset.relatedPackages || '')
+                        .split(',')
+                        .map((value) => parseInt(value, 10))
+                        .filter((value) => Number.isInteger(value) && value > 0);
+
+                    return {
+                        id: parseInt(card.dataset.id || '0', 10),
+                        name: card.querySelector('h3')?.textContent?.trim() || '',
+                        description: card.querySelector('p')?.textContent?.trim() || '',
+                        category: card.dataset.category || '',
+                        pricing: parseInt(card.dataset.price || '0', 10),
+                        relatedPackages,
+                        popularity: parseInt(card.dataset.popularity || '0', 10)
+                    };
+                }).filter((pkg) => Number.isInteger(pkg.id) && pkg.id > 0);
+            }
+
+            function getRecommendedPackages(packages, history, limit = 5) {
+                const bookedIds = new Set(history.map((item) => item.packageId));
+                const bookedPackages = packages.filter((pkg) => bookedIds.has(pkg.id));
+
+                if (!history.length || !bookedPackages.length) {
+                    return [...packages]
+                        .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+                        .slice(0, limit)
+                        .map((pkg) => ({
+                            ...pkg,
+                            score: pkg.popularity || 0,
+                            reasons: ['Popular package']
+                        }));
+                }
+
+                const candidateMap = new Map();
+
+                function addCandidate(pkg, points, reason, sourceBookedId) {
+                    if (!pkg || bookedIds.has(pkg.id)) {
+                        return;
+                    }
+
+                    if (!candidateMap.has(pkg.id)) {
+                        candidateMap.set(pkg.id, {
+                            ...pkg,
+                            score: 0,
+                            reasons: [],
+                            sourceBookedIds: new Set()
+                        });
+                    }
+
+                    const existing = candidateMap.get(pkg.id);
+                    existing.score += points;
+                    if (reason && !existing.reasons.includes(reason)) {
+                        existing.reasons.push(reason);
+                    }
+
+                    if (Number.isInteger(sourceBookedId)) {
+                        const before = existing.sourceBookedIds.size;
+                        existing.sourceBookedIds.add(sourceBookedId);
+                        if (existing.sourceBookedIds.size > before) {
+                            existing.score += 15;
+                        }
+                    }
+                }
+
+                // 1) Related package candidates
+                bookedPackages.forEach((bookedPkg) => {
+                    (bookedPkg.relatedPackages || []).forEach((relatedId) => {
+                        const relatedPkg = packages.find((pkg) => pkg.id === relatedId);
+                        if (relatedPkg) {
+                            addCandidate(
+                                relatedPkg,
+                                50,
+                                `Related to ${bookedPkg.name}`,
+                                bookedPkg.id
+                            );
+                        }
+                    });
+                });
+
+                // 2) Same category fallback
+                if (candidateMap.size < limit) {
+                    bookedPackages.forEach((bookedPkg) => {
+                        packages.forEach((pkg) => {
+                            if (pkg.category === bookedPkg.category && !bookedIds.has(pkg.id)) {
+                                addCandidate(
+                                    pkg,
+                                    20,
+                                    `Same category as ${bookedPkg.name}`,
+                                    bookedPkg.id
+                                );
+                            }
+                        });
+                    });
+                }
+
+                // 3) Popularity bonus
+                candidateMap.forEach((candidate) => {
+                    candidate.score += candidate.popularity || 0;
+                });
+
+                // 4) Sort and limit
+                return Array.from(candidateMap.values())
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, limit)
+                    .map((candidate) => ({
+                        ...candidate,
+                        sourceBookedIds: undefined
+                    }));
+            }
+
+            function renderRecommendations(recommendations) {
+                recommendedContainer.innerHTML = '';
+
+                if (!recommendations.length) {
+                    const emptyState = document.createElement('p');
+                    emptyState.textContent = 'No recommendations available right now.';
+                    recommendedContainer.appendChild(emptyState);
+                    return;
+                }
+
+                recommendations.forEach((pkg) => {
+                    const card = document.createElement('div');
+                    card.className = 'package-item';
+
+                    const reasons = (pkg.reasons || []).slice(0, 2).join(' | ');
+
+                    card.innerHTML = `
+                        <h3>${pkg.name}</h3>
+                        <p>${pkg.description}</p>
+                        <p><strong>Price:</strong> Rs. ${pkg.pricing || 0}</p>
+                        <p><strong>Why recommended:</strong> ${reasons || 'Relevant to your history'}</p>
+                    `;
+
+                    recommendedContainer.appendChild(card);
+                });
+            }
+
+            const packages = parsePackagesFromDom();
+            const recommendations = getRecommendedPackages(packages, bookingHistory, 5);
+            renderRecommendations(recommendations);
+            populateCategories();
+
+            if (searchInput && categorySelect && sortSelect) {
+                searchInput.addEventListener('input', applyFilters);
+                categorySelect.addEventListener('change', applyFilters);
+                sortSelect.addEventListener('change', applyFilters);
+
+                if (resetButton) {
+                    resetButton.addEventListener('click', () => {
+                        searchInput.value = '';
+                        categorySelect.value = 'all';
+                        sortSelect.value = 'name-asc';
+                        applyFilters();
+                    });
+                }
+
+                applyFilters();
+            }
+
+            cards.forEach((card) => {
+                const checkbox = card.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.addEventListener('change', updateBookingSummary);
+                }
+            });
+
+            updateBookingSummary();
         })();
     </script>
 </body>

@@ -83,7 +83,7 @@ header nav ul li a,
     padding: 10px 14px;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.24);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(8, 63, 66, 0.48);
     font-size: 0.95rem;
     font-weight: 600;
     transition: transform 0.2s ease, background 0.25s ease, border-color 0.25s ease;
@@ -92,7 +92,7 @@ header nav ul li a,
 header nav ul li a:hover,
 .login-btn:hover {
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(8, 63, 66, 0.62);
     border-color: rgba(255, 255, 255, 0.55);
 }
 
@@ -237,6 +237,82 @@ button:hover,
     margin-right: 8px;
 }
 
+#packages form {
+    padding-bottom: 92px;
+}
+
+#packages .package-controls {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    position: sticky;
+    top: 8px;
+    z-index: 4;
+    background: rgba(250, 255, 254, 0.92);
+    backdrop-filter: blur(6px);
+    padding: 10px;
+    border: 1px solid #d8ebe8;
+    border-radius: 14px;
+}
+
+#packages .package-controls .btn {
+    white-space: nowrap;
+}
+
+#packageResultCount {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+
+#packages .booking-form-submit {
+    margin-top: 10px;
+}
+
+#packages .booking-quickbar {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    width: min(960px, calc(100% - 20px));
+    background: linear-gradient(120deg, #ecfffb, #dcf7f3);
+    border: 1px solid #c5e9e2;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 14px 28px rgba(17, 72, 66, 0.2);
+    z-index: 50;
+}
+
+#packages .booking-quickbar-meta {
+    display: grid;
+    gap: 2px;
+}
+
+#packages .booking-quickbar-meta strong {
+    font-size: 0.95rem;
+    color: #144a46;
+}
+
+#packages .booking-quickbar-meta span {
+    font-size: 0.87rem;
+    color: #2f5f5b;
+}
+
+#packages .booking-quickbar .btn:disabled,
+#packages .booking-form-submit .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+}
+
 #packages .package-toolbar {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
@@ -337,6 +413,27 @@ footer p {
     #packages .package-toolbar {
         grid-template-columns: 1fr;
     }
+
+    #packages .package-controls {
+        grid-template-columns: 1fr 1fr;
+        top: 6px;
+    }
+
+    #packages .package-controls input,
+    #packages .package-controls select,
+    #packages .package-controls .btn {
+        grid-column: span 2;
+    }
+
+    #packages .package-controls .btn {
+        justify-self: stretch;
+    }
+
+    #packages .booking-quickbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
 }
 
 @media (max-width: 640px) {
@@ -355,5 +452,16 @@ footer p {
     .login-btn {
         padding: 8px 11px;
         font-size: 0.88rem;
+    }
+
+    #packages form {
+        padding-bottom: 120px;
+    }
+
+    #packages .booking-quickbar {
+        bottom: 8px;
+        width: calc(100% - 12px);
+        border-radius: 12px;
+        padding: 8px 10px;
     }
 }
