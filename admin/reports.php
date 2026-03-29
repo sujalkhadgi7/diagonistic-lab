@@ -174,12 +174,19 @@ if (isset($_POST['update_report'])) {
         return;
       }
 
-      fetch("fetch-appointments.php?date=" + selectedDate)
+      fetch("fetch-appointments.php?date=" + encodeURIComponent(selectedDate))
         .then(response => response.json())
-        .then(data => {
+        .then(payload => {
           tableBody.innerHTML = "";
-          if (data.length > 0) {
-            let rows = data.map(app => {
+          if (!payload.success) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="no-data">${payload.error || "Failed to fetch appointments"}</td></tr>`;
+            return;
+          }
+
+          const appointments = (payload.data && payload.data.appointments) ? payload.data.appointments : [];
+
+          if (appointments.length > 0) {
+            let rows = appointments.map(app => {
               return `<tr>
                 <td>${app.id}</td>
                 <td>${app.name}</td>
@@ -197,7 +204,9 @@ if (isset($_POST['update_report'])) {
             tableBody.innerHTML = `<tr><td colspan="6" class="no-data">No appointments found</td></tr>`;
           }
         })
-        .catch(error => console.error("Error fetching data:", error));
+        .catch(() => {
+          tableBody.innerHTML = `<tr><td colspan="6" class="no-data">Error fetching appointments</td></tr>`;
+        });
     }
 
     function attachModalEvents() {

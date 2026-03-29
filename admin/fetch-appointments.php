@@ -119,7 +119,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // Fetch total count for pagination
-$countQuery = $baseQuery;
+$countQuery = "SELECT COUNT(*) as total FROM {$table['APPOINTMENT']}";
 if (!empty($whereConditions)) {
     $countQuery .= ' WHERE ' . implode(' AND ', $whereConditions);
 }
