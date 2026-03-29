@@ -237,6 +237,55 @@ button:hover,
     margin-right: 8px;
 }
 
+#packages .package-toolbar {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+    align-items: end;
+}
+
+#packages .package-toolbar .field {
+    display: grid;
+    gap: 6px;
+}
+
+#packages .package-toolbar label {
+    font-size: 0.9rem;
+}
+
+#packages .package-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#packages .package-price {
+    font-weight: 700;
+    color: var(--brand-strong);
+}
+
+#packages .package-category {
+    font-size: 0.8rem;
+    background: #e8f5f4;
+    border: 1px solid #c3e1dd;
+    border-radius: 999px;
+    padding: 3px 10px;
+    color: #1f5559;
+}
+
+#packages .no-package-match {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 16px;
+    border: 1px dashed #c7ddda;
+    border-radius: 12px;
+    color: var(--muted);
+    background: #f9fdfd;
+}
+
 .report-gallery {
     margin-top: 18px;
     display: grid;
@@ -283,6 +332,10 @@ footer p {
 
     header {
         position: static;
+    }
+
+    #packages .package-toolbar {
+        grid-template-columns: 1fr;
     }
 }
 

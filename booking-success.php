@@ -11,14 +11,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
-    
+
         // Escape the user_id for security
         $user_id = mysqli_real_escape_string($conn, $user_id);
-    
+
         // Fetch user information from the COSTUMERS table based on user_id
         $sql = "SELECT * FROM $table[COSTUMERS] WHERE id = '$user_id' LIMIT 1";
         $result = $conn->query($sql);
-    
+
         if ($result && $result->num_rows > 0) {
             // Fetch user data from the result
             $user = $result->fetch_assoc();
@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     } else {
         header("Location: login.php");
-    }   
+    }
 
     // Convert selected packages into a comma-separated string
     if (isset($_POST['packages']) && is_array($_POST['packages'])) {
@@ -55,30 +55,33 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OM Diagnostic Lab</title>
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
     <?php
-        $currentPage = 'health-package';
-        include __DIR__ . '/includes/header.php';
+    $currentPage = 'health-package';
+    include __DIR__ . '/includes/header.php';
     ?>
 
     <!-- Home Section -->
     <section id="home" class="section-container active">
-        <?php 
-            if (isset($_SESSION["user_name"])) {
-                echo "<h2>Successfully filled the form</h2>";
-                $name = $_SESSION["user_name"];
-                echo "<h3>Thank you for your submission, $name.</h3>";
-            }
+        <?php
+        if (isset($_SESSION["user_name"])) {
+            echo "<h2>Successfully filled the form</h2>";
+            $name = $_SESSION["user_name"];
+            echo "<h3>Thank you for your submission, $name.</h3>";
+        }
         ?>
-        
+
     </section>
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
 </body>
+
 </html>
