@@ -12,6 +12,11 @@ if (!isset($_SESSION["loggedIn"]) || !$_SESSION["loggedIn"]) {
 $sql = "SELECT * FROM {$table['APPOINTMENT']}";
 $data = $conn->query($sql);
 
+// Flash messages (shown once)
+$flashError = $_SESSION['flash_error'] ?? '';
+$flashSuccess = $_SESSION['flash_success'] ?? '';
+unset($_SESSION['flash_error'], $_SESSION['flash_success']);
+
 // Handle form submission to update the appointment date
 if (isset($_POST['update_appointment'])) {
     $appointmentId = $_POST['appointment_id'];
@@ -51,7 +56,14 @@ if (isset($_POST['update_appointment'])) {
 
         // Include the PHPMailer script
         require_once 'sendemail/send.php';  
-        sendAppointmentEmail($patientEmail, $subject, $message);
+
+        $emailError = null;
+        $sent = sendAppointmentEmail($patientEmail, $subject, $message, $emailError);
+        if (!$sent) {
+            $_SESSION['flash_error'] = 'Email failed to send: ' . ($emailError ?: 'Unknown error');
+        } else {
+            $_SESSION['flash_success'] = 'Appointment updated and confirmation email sent.';
+        }
     }
 
     header("Location: appointments.php");
@@ -85,6 +97,15 @@ if (isset($_POST['update_appointment'])) {
 
     <main class="main-content">
         <h1>Appointments</h1>
+        <?php if ($flashError): ?>
+            <div class="card">
+                <p><strong>Error:</strong> <?php echo htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8'); ?></p>
+            </div>
+        <?php elseif ($flashSuccess): ?>
+            <div class="card">
+                <p><strong>Success:</strong> <?php echo htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8'); ?></p>
+            </div>
+        <?php endif; ?>
         <div class="card">
             <div class="table-container">
                 <table class="user-table">

@@ -9,7 +9,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Function to send email
-function sendAppointmentEmail($patientEmail, $subject, $message) {
+function sendAppointmentEmail($patientEmail, $subject, $message, &$error = null) {
     $mail = new PHPMailer(true); // Create instance of PHPMailer
 
     try {
@@ -33,9 +33,10 @@ function sendAppointmentEmail($patientEmail, $subject, $message) {
 
         // Send email
         $mail->send();
-        echo "<script>alert('Sent successfully');</script>";
+        return true;
     } catch (Exception $e) {
-        echo "<script>alert('Failed to send email: {$mail->ErrorInfo}');</script>";
+        $error = $mail->ErrorInfo ?: $e->getMessage();
+        return false;
     }
 }
 ?>
