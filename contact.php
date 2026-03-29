@@ -48,6 +48,7 @@ if (session_status() === PHP_SESSION_NONE) {
             </article>
 
             <article class="contact-card">
+
                 <h3>Working Hours</h3>
                 <p>Sun - Fri: 6:30 AM - 7:00 PM</p>
                 <p>Saturday: 7:00 AM - 2:00 PM</p>
