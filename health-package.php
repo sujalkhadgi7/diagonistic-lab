@@ -23,16 +23,21 @@ include_once __DIR__ . '/src/constants/table.php';
     include_once __DIR__ . '/includes/header.php';
     ?>
 
-    <!-- Health Packages Section -->
     <section id="packages" class="section-container">
         <h2>Our Test Packages</h2>
+        <p class="section-subtitle">
+            Search, filter, compare, and book the right diagnostic packages for your needs.
+        </p>
+
         <form action="booking-success.php" method="POST">
             <div class="package-controls">
                 <input type="search" id="packageSearch" placeholder="Search by test name or description"
                     aria-label="Search packages">
+
                 <select id="packageCategory" aria-label="Filter by category">
                     <option value="all">All Categories</option>
                 </select>
+
                 <select id="packageSort" aria-label="Sort packages">
                     <option value="name-asc">Name: A to Z</option>
                     <option value="name-desc">Name: Z to A</option>
@@ -40,16 +45,27 @@ include_once __DIR__ . '/src/constants/table.php';
                     <option value="price-desc">Price: High to Low</option>
                     <option value="popularity-desc">Popularity</option>
                 </select>
+
                 <button type="button" id="packageReset" class="btn">Reset</button>
             </div>
-            <p id="packageResultCount" aria-live="polite"></p>
 
-
-            <div class="recommended-section">
-                <h3>Recommended For You</h3>
-                <div id="recommendedPackages" class="package-list"></div>
+            <div class="package-result-meta">
+                <p id="packageResultCount" aria-live="polite"></p>
             </div>
-            <div class="package-list">
+
+            <div class="recommended-section" id="recommendedSection">
+                <div class="section-head">
+                    <div>
+                        <h3 id="recommendedTitle">Recommended For You</h3>
+                        <p id="recommendedSubtitle" class="section-subtitle">
+                            Based on your previous bookings.
+                        </p>
+                    </div>
+                </div>
+                <div id="recommendedPackages" class="package-list recommended-list"></div>
+            </div>
+
+            <div id="allPackagesList" class="package-list">
                 <?php
                 $packages = [
 
@@ -170,10 +186,9 @@ include_once __DIR__ . '/src/constants/table.php';
                     ["id" => 59, "name" => "CA-125 Test", "description" => "Measures tumor marker CA-125. Helps detect ovarian cancer risk.", "pricing" => 2500, "category" => "Cancer", "tags" => ["cancer"], "related_packages" => [], "popularity" => 70],
 
                     ["id" => 60, "name" => "CEA Test", "description" => "Measures carcinoembryonic antigen. Helps monitor certain cancers and treatment progress.", "pricing" => 2200, "category" => "Cancer", "tags" => ["cancer"], "related_packages" => [], "popularity" => 70]
-
                 ];
 
-                // Build mapping of package names to IDs for quick lookup
+                // Build mapping of package names to IDs
                 $packageNameToId = [];
                 foreach ($packages as $package) {
                     $packageNameToId[$package['name']] = $package['id'];
@@ -184,7 +199,6 @@ include_once __DIR__ . '/src/constants/table.php';
                 if (isset($_SESSION['email']) && !empty($_SESSION['email'])) {
                     $userEmail = $_SESSION['email'];
 
-                    // Query appointments for this user
                     $query = "SELECT package FROM " . $table['APPOINTMENT'] . " WHERE email = ?";
                     $stmt = $conn->prepare($query);
 
@@ -194,9 +208,7 @@ include_once __DIR__ . '/src/constants/table.php';
                         $result = $stmt->get_result();
 
                         if ($result && $result->num_rows > 0) {
-                            // Process each appointment
                             while ($row = $result->fetch_assoc()) {
-                                // Split package CSV and map each to ID
                                 $packageNames = array_map('trim', explode(',', $row['package']));
                                 foreach ($packageNames as $packageName) {
                                     if (!empty($packageName) && isset($packageNameToId[$packageName])) {
@@ -218,6 +230,7 @@ include_once __DIR__ . '/src/constants/table.php';
                     $name = htmlspecialchars((string) ($package['name'] ?? ''), ENT_QUOTES, 'UTF-8');
                     $description = htmlspecialchars((string) ($package['description'] ?? ''), ENT_QUOTES, 'UTF-8');
                     $category = htmlspecialchars(strtolower((string) ($package['category'] ?? '')), ENT_QUOTES, 'UTF-8');
+                    $displayCategory = htmlspecialchars((string) ($package['category'] ?? ''), ENT_QUOTES, 'UTF-8');
                     $price = (int) ($package['pricing'] ?? 0);
                     $popularity = (int) ($package['popularity'] ?? 0);
                     $related = array_map('intval', (array) ($package['related_packages'] ?? []));
@@ -228,11 +241,25 @@ include_once __DIR__ . '/src/constants/table.php';
                         data-description="<?php echo strtolower($description); ?>" data-category="<?php echo $category; ?>"
                         data-price="<?php echo $price; ?>" data-popularity="<?php echo $popularity; ?>"
                         data-related-packages="<?php echo $relatedCsv; ?>">
-                        <h3><?php echo $name; ?></h3>
-                        <p><?php echo $description; ?></p>
-                        <p><strong>Price:</strong> Rs. <?php echo $price; ?></p>
-                        <label>
-                            <input type="checkbox" name="packages[]" value="<?php echo $name; ?>"> Select
+                        <h3>
+                            <?php echo $name; ?>
+                        </h3>
+                        <p>
+                            <?php echo $description; ?>
+                        </p>
+
+                        <div class="package-meta">
+                            <span class="package-category">
+                                <?php echo $displayCategory; ?>
+                            </span>
+                            <span class="package-price">Rs.
+                                <?php echo $price; ?>
+                            </span>
+                        </div>
+
+                        <label class="package-select">
+                            <input type="checkbox" name="packages[]" value="<?php echo $name; ?>">
+                            <span>Select package</span>
                         </label>
                     </div>
                 <?php endforeach; ?>
@@ -240,35 +267,43 @@ include_once __DIR__ . '/src/constants/table.php';
 
             <div class="booking-quickbar" id="bookingQuickBar">
                 <div class="booking-quickbar-meta">
-                    <strong id="selectedPackageCount">0 package selected</strong>
+                    <strong id="selectedPackageCount">0 packages selected</strong>
                     <span id="selectedPackageTotal">Total: Rs. 0</span>
                 </div>
-                <button type="submit" class="btn" id="quickBookButton" disabled>Book Selected Packages</button>
+                <button type="submit" class="btn" id="quickBookButton" disabled>
+                    Book Selected Packages
+                </button>
             </div>
 
             <div class="booking-form-submit">
-                <button type="submit" class="btn" id="mainBookButton" disabled>Book Selected Packages</button>
+                <button type="submit" class="btn" id="mainBookButton" disabled>
+                    Book Selected Packages
+                </button>
             </div>
         </form>
-
-
     </section>
 
     <?php include_once __DIR__ . '/includes/footer.php'; ?>
 
     <script>
         (function () {
-            const packageList = document.querySelector('.package-list');
+            const packageList = document.getElementById('allPackagesList');
             const recommendedContainer = document.getElementById('recommendedPackages');
+            const recommendedSection = document.getElementById('recommendedSection');
+            const recommendedTitle = document.getElementById('recommendedTitle');
+            const recommendedSubtitle = document.getElementById('recommendedSubtitle');
+
             const searchInput = document.getElementById('packageSearch');
             const categorySelect = document.getElementById('packageCategory');
             const sortSelect = document.getElementById('packageSort');
             const resetButton = document.getElementById('packageReset');
             const resultCount = document.getElementById('packageResultCount');
+
             const selectedPackageCount = document.getElementById('selectedPackageCount');
             const selectedPackageTotal = document.getElementById('selectedPackageTotal');
             const quickBookButton = document.getElementById('quickBookButton');
             const mainBookButton = document.getElementById('mainBookButton');
+
             const bookingHistory = <?php echo json_encode($bookingHistory, JSON_UNESCAPED_UNICODE); ?>;
 
             if (!packageList || !recommendedContainer) {
@@ -276,30 +311,49 @@ include_once __DIR__ . '/src/constants/table.php';
             }
 
             const cards = Array.from(packageList.querySelectorAll('.package-item'));
+            const cardMap = new Map();
+
+            cards.forEach((card) => {
+                const id = parseInt(card.dataset.id || '0', 10);
+                if (id) {
+                    cardMap.set(id, card);
+                }
+            });
+
             const noData = document.createElement('div');
             noData.className = 'no-package-match';
             noData.textContent = 'No packages match your filters.';
 
+            function parsePackagesFromDom() {
+                return cards.map((card) => {
+                    const relatedPackages = (card.dataset.relatedPackages || '')
+                        .split(',')
+                        .map((value) => parseInt(value, 10))
+                        .filter((value) => Number.isInteger(value) && value > 0);
+
+                    return {
+                        id: parseInt(card.dataset.id || '0', 10),
+                        index: parseInt(card.dataset.index || '0', 10),
+                        name: card.querySelector('h3')?.textContent?.trim() || '',
+                        description: card.querySelector('p')?.textContent?.trim() || '',
+                        category: card.dataset.category || '',
+                        pricing: parseInt(card.dataset.price || '0', 10),
+                        popularity: parseInt(card.dataset.popularity || '0', 10),
+                        relatedPackages
+                    };
+                }).filter((pkg) => Number.isInteger(pkg.id) && pkg.id > 0);
+            }
+
+            const packages = parsePackagesFromDom();
+
             function populateCategories() {
-                if (!categorySelect) {
-                    return;
-                }
+                if (!categorySelect) return;
 
-                const existingValues = new Set(
-                    Array.from(categorySelect.options).map((option) => option.value)
-                );
+                const categories = [...new Set(packages.map(pkg => pkg.category).filter(Boolean))];
 
-                const categories = new Set(
-                    cards.map((card) => card.dataset.category || '').filter(Boolean)
-                );
-
-                Array.from(categories)
+                categories
                     .sort((a, b) => a.localeCompare(b))
                     .forEach((categoryValue) => {
-                        if (existingValues.has(categoryValue)) {
-                            return;
-                        }
-
                         const option = document.createElement('option');
                         option.value = categoryValue;
                         option.textContent = categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1);
@@ -307,82 +361,10 @@ include_once __DIR__ . '/src/constants/table.php';
                     });
             }
 
-            function applyFilters() {
-                if (!searchInput || !categorySelect || !sortSelect) {
-                    return;
-                }
-
-                const term = searchInput.value.trim().toLowerCase();
-                const category = categorySelect.value;
-                const sort = sortSelect.value;
-
-                const filtered = cards.filter((card) => {
-                    const name = card.dataset.name || '';
-                    const description = card.dataset.description || '';
-                    const cardCategory = card.dataset.category || '';
-
-                    const matchesSearch = !term || name.includes(term) || description.includes(term);
-                    const matchesCategory = category === 'all' || cardCategory === category;
-
-                    return matchesSearch && matchesCategory;
-                });
-
-                filtered.sort((a, b) => {
-                    const nameA = (a.dataset.name || '').toLowerCase();
-                    const nameB = (b.dataset.name || '').toLowerCase();
-                    const priceA = parseInt(a.dataset.price || '0', 10);
-                    const priceB = parseInt(b.dataset.price || '0', 10);
-                    const popularityA = parseInt(a.dataset.popularity || '0', 10);
-                    const popularityB = parseInt(b.dataset.popularity || '0', 10);
-                    const indexA = parseInt(a.dataset.index || '0', 10);
-                    const indexB = parseInt(b.dataset.index || '0', 10);
-
-                    if (sort === 'name-desc') {
-                        return nameB.localeCompare(nameA);
-                    }
-                    if (sort === 'price-asc') {
-                        return priceA - priceB;
-                    }
-                    if (sort === 'price-desc') {
-                        return priceB - priceA;
-                    }
-                    if (sort === 'popularity-desc') {
-                        return popularityB - popularityA;
-                    }
-
-                    // Default sort keeps the seeded order for predictable UI.
-                    if (sort === 'name-asc') {
-                        return nameA.localeCompare(nameB);
-                    }
-                    return indexA - indexB;
-                });
-
-                cards.forEach((card) => {
-                    card.style.display = 'none';
-                });
-
-                filtered.forEach((card) => {
-                    packageList.appendChild(card);
-                    card.style.display = '';
-                });
-
-                const hasMatch = filtered.length > 0;
-                if (!hasMatch && !packageList.contains(noData)) {
-                    packageList.appendChild(noData);
-                }
-                if (hasMatch && packageList.contains(noData)) {
-                    noData.remove();
-                }
-
-                if (resultCount) {
-                    resultCount.textContent = `${filtered.length} package(s) shown`;
-                }
-            }
-
             function updateBookingSummary() {
                 const selected = cards.filter((card) => {
                     const checkbox = card.querySelector('input[type="checkbox"]');
-                    return checkbox ? checkbox.checked : false;
+                    return checkbox?.checked;
                 });
 
                 const count = selected.length;
@@ -405,27 +387,6 @@ include_once __DIR__ . '/src/constants/table.php';
                 if (mainBookButton) {
                     mainBookButton.disabled = count === 0;
                 }
-            }
-
-            function parsePackagesFromDom() {
-                const cards = Array.from(packageList.querySelectorAll('.package-item'));
-
-                return cards.map((card) => {
-                    const relatedPackages = (card.dataset.relatedPackages || '')
-                        .split(',')
-                        .map((value) => parseInt(value, 10))
-                        .filter((value) => Number.isInteger(value) && value > 0);
-
-                    return {
-                        id: parseInt(card.dataset.id || '0', 10),
-                        name: card.querySelector('h3')?.textContent?.trim() || '',
-                        description: card.querySelector('p')?.textContent?.trim() || '',
-                        category: card.dataset.category || '',
-                        pricing: parseInt(card.dataset.price || '0', 10),
-                        relatedPackages,
-                        popularity: parseInt(card.dataset.popularity || '0', 10)
-                    };
-                }).filter((pkg) => Number.isInteger(pkg.id) && pkg.id > 0);
             }
 
             function getRecommendedPackages(packages, history, limit = 5) {
@@ -461,6 +422,7 @@ include_once __DIR__ . '/src/constants/table.php';
 
                     const existing = candidateMap.get(pkg.id);
                     existing.score += points;
+
                     if (reason && !existing.reasons.includes(reason)) {
                         existing.reasons.push(reason);
                     }
@@ -474,7 +436,6 @@ include_once __DIR__ . '/src/constants/table.php';
                     }
                 }
 
-                // 1) Related package candidates
                 bookedPackages.forEach((bookedPkg) => {
                     (bookedPkg.relatedPackages || []).forEach((relatedId) => {
                         const relatedPkg = packages.find((pkg) => pkg.id === relatedId);
@@ -489,7 +450,6 @@ include_once __DIR__ . '/src/constants/table.php';
                     });
                 });
 
-                // 2) Same category fallback
                 if (candidateMap.size < limit) {
                     bookedPackages.forEach((bookedPkg) => {
                         packages.forEach((pkg) => {
@@ -505,12 +465,10 @@ include_once __DIR__ . '/src/constants/table.php';
                     });
                 }
 
-                // 3) Popularity bonus
                 candidateMap.forEach((candidate) => {
                     candidate.score += candidate.popularity || 0;
                 });
 
-                // 4) Sort and limit
                 return Array.from(candidateMap.values())
                     .sort((a, b) => b.score - a.score)
                     .slice(0, limit)
@@ -520,53 +478,162 @@ include_once __DIR__ . '/src/constants/table.php';
                     }));
             }
 
+            function selectPackageById(packageId) {
+                const card = cardMap.get(packageId);
+                if (!card) return;
+
+                const checkbox = card.querySelector('input[type="checkbox"]');
+                if (checkbox && !checkbox.checked) {
+                    checkbox.checked = true;
+                    updateBookingSummary();
+                }
+
+                card.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                card.classList.add('package-highlight');
+                setTimeout(() => {
+                    card.classList.remove('package-highlight');
+                }, 1500);
+            }
+
             function renderRecommendations(recommendations) {
                 recommendedContainer.innerHTML = '';
 
                 if (!recommendations.length) {
-                    const emptyState = document.createElement('p');
-                    emptyState.textContent = 'No recommendations available right now.';
-                    recommendedContainer.appendChild(emptyState);
+                    recommendedSection.style.display = 'none';
                     return;
                 }
 
+                recommendedSection.style.display = '';
+
+                const hasHistory = bookingHistory.length > 0;
+                recommendedTitle.textContent = hasHistory ? 'Recommended For You' : 'Popular Packages';
+                recommendedSubtitle.textContent = hasHistory
+                    ? 'Based on your previous bookings.'
+                    : 'Trending tests patients book most often.';
+
                 recommendations.forEach((pkg) => {
                     const card = document.createElement('div');
-                    card.className = 'package-item';
+                    card.className = 'package-item recommended-card';
 
-                    const reasons = (pkg.reasons || []).slice(0, 2).join(' | ');
+                    const reasons = (pkg.reasons || []).slice(0, 2);
 
                     card.innerHTML = `
+                        <div class="recommendation-badge">Recommended</div>
                         <h3>${pkg.name}</h3>
                         <p>${pkg.description}</p>
-                        <p><strong>Price:</strong> Rs. ${pkg.pricing || 0}</p>
-                        <p><strong>Why recommended:</strong> ${reasons || 'Relevant to your history'}</p>
+                        <div class="package-meta">
+                            <span class="package-category">${pkg.category}</span>
+                            <span class="package-price">Rs. ${pkg.pricing || 0}</span>
+                        </div>
+                        <div class="recommendation-reasons">
+                            ${reasons.map(reason => `<span class="reason-chip">${reason}</span>`).join('')}
+                        </div>
+                        <button type="button" class="btn recommendation-action" data-package-id="${pkg.id}">
+                            Select this package
+                        </button>
                     `;
 
                     recommendedContainer.appendChild(card);
                 });
+
+                recommendedContainer.querySelectorAll('.recommendation-action').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const packageId = parseInt(button.dataset.packageId || '0', 10);
+                        if (packageId) {
+                            selectPackageById(packageId);
+                        }
+                    });
+                });
             }
 
-            const packages = parsePackagesFromDom();
+            function applyFilters() {
+                const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+                const category = categorySelect ? categorySelect.value : 'all';
+                const sort = sortSelect ? sortSelect.value : 'name-asc';
+
+                const filtered = cards.filter((card) => {
+                    const name = card.dataset.name || '';
+                    const description = card.dataset.description || '';
+                    const cardCategory = card.dataset.category || '';
+
+                    const matchesSearch = !term || name.includes(term) || description.includes(term);
+                    const matchesCategory = category === 'all' || cardCategory === category;
+
+                    return matchesSearch && matchesCategory;
+                });
+
+                filtered.sort((a, b) => {
+                    const nameA = (a.dataset.name || '').toLowerCase();
+                    const nameB = (b.dataset.name || '').toLowerCase();
+                    const priceA = parseInt(a.dataset.price || '0', 10);
+                    const priceB = parseInt(b.dataset.price || '0', 10);
+                    const popularityA = parseInt(a.dataset.popularity || '0', 10);
+                    const popularityB = parseInt(b.dataset.popularity || '0', 10);
+                    const indexA = parseInt(a.dataset.index || '0', 10);
+                    const indexB = parseInt(b.dataset.index || '0', 10);
+
+                    if (sort === 'name-desc') return nameB.localeCompare(nameA);
+                    if (sort === 'price-asc') return priceA - priceB;
+                    if (sort === 'price-desc') return priceB - priceA;
+                    if (sort === 'popularity-desc') return popularityB - popularityA;
+                    if (sort === 'name-asc') return nameA.localeCompare(nameB);
+
+                    return indexA - indexB;
+                });
+
+                cards.forEach((card) => {
+                    card.style.display = 'none';
+                });
+
+                filtered.forEach((card) => {
+                    packageList.appendChild(card);
+                    card.style.display = '';
+                });
+
+                const hasMatch = filtered.length > 0;
+
+                if (!hasMatch && !packageList.contains(noData)) {
+                    packageList.appendChild(noData);
+                }
+
+                if (hasMatch && packageList.contains(noData)) {
+                    noData.remove();
+                }
+
+                if (resultCount) {
+                    resultCount.textContent = `${filtered.length} package${filtered.length === 1 ? '' : 's'} shown`;
+                }
+            }
+
             const recommendations = getRecommendedPackages(packages, bookingHistory, 5);
             renderRecommendations(recommendations);
             populateCategories();
+            applyFilters();
+            updateBookingSummary();
 
-            if (searchInput && categorySelect && sortSelect) {
+            if (searchInput) {
                 searchInput.addEventListener('input', applyFilters);
+            }
+
+            if (categorySelect) {
                 categorySelect.addEventListener('change', applyFilters);
+            }
+
+            if (sortSelect) {
                 sortSelect.addEventListener('change', applyFilters);
+            }
 
-                if (resetButton) {
-                    resetButton.addEventListener('click', () => {
-                        searchInput.value = '';
-                        categorySelect.value = 'all';
-                        sortSelect.value = 'name-asc';
-                        applyFilters();
-                    });
-                }
-
-                applyFilters();
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    if (searchInput) searchInput.value = '';
+                    if (categorySelect) categorySelect.value = 'all';
+                    if (sortSelect) sortSelect.value = 'name-asc';
+                    applyFilters();
+                });
             }
 
             cards.forEach((card) => {
@@ -575,8 +642,6 @@ include_once __DIR__ . '/src/constants/table.php';
                     checkbox.addEventListener('change', updateBookingSummary);
                 }
             });
-
-            updateBookingSummary();
         })();
     </script>
 </body>
