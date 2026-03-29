@@ -64,6 +64,9 @@ include_once __DIR__ . '/src/constants/table.php';
 
             <div class="package-result-meta">
                 <p id="packageResultCount" aria-live="polite"></p>
+                <button type="submit" class="btn" id="inlineBookButton" disabled>
+                    Book Selected
+                </button>
             </div>
 
 
@@ -297,7 +300,7 @@ include_once __DIR__ . '/src/constants/table.php';
             const selectedPackageCount = document.getElementById('selectedPackageCount');
             const selectedPackageTotal = document.getElementById('selectedPackageTotal');
             const quickBookButton = document.getElementById('quickBookButton');
-            const mainBookButton = document.getElementById('mainBookButton');
+            const inlineBookButton = document.getElementById('inlineBookButton');
             const bookingHistory = <?php echo json_encode($bookingHistory, JSON_UNESCAPED_UNICODE); ?>;
 
             if (!packageList || !recommendedContainer) {
@@ -389,8 +392,8 @@ include_once __DIR__ . '/src/constants/table.php';
                     quickBookButton.disabled = count === 0;
                 }
 
-                if (mainBookButton) {
-                    mainBookButton.disabled = count === 0;
+                if (inlineBookButton) {
+                    inlineBookButton.disabled = count === 0;
                 }
             }
 
@@ -595,7 +598,7 @@ include_once __DIR__ . '/src/constants/table.php';
             }
 
             populateCategories();
-            renderRecommendations(getRecommendedPackages(packages, bookingHistory, 5));
+            renderRecommendations(getRecommendedPackages(packages, bookingHistory, 3));
             applyFilters();
             updateBookingSummary();
 

@@ -487,9 +487,26 @@ footer p {
     margin-bottom: 18px;
 }
 
+#packages .package-result-meta {
+    position: sticky;
+    top: 72px;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #d6e9e6;
+    border-radius: 12px;
+    padding: 8px 10px;
+    backdrop-filter: blur(4px);
+}
+
+#packages #inlineBookButton {
+    white-space: nowrap;
+    min-height: 40px;
+    padding: 9px 16px;
+}
+
 .recommended-section {
     margin: 24px 0 32px;
-    padding: 20px;
+    padding: 14px;
     border-radius: var(--radius-lg);
     background: linear-gradient(135deg, rgba(15, 118, 110, 0.06), rgba(249, 115, 22, 0.04));
     border: 1px solid rgba(15, 118, 110, 0.12);
@@ -497,8 +514,16 @@ footer p {
 
 .recommended-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(250px, 300px);
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+}
+
+.recommended-list .package-item {
+    scroll-snap-align: start;
 }
 
 .package-select {
@@ -715,7 +740,7 @@ footer p {
 
 #packages .recommended-section {
     border-radius: 18px;
-    padding: 18px;
+    padding: 12px;
     border: 1px solid rgba(15, 118, 110, 0.14);
     background: linear-gradient(180deg, rgba(15, 118, 110, 0.07), rgba(255, 255, 255, 0.82));
 }
@@ -814,5 +839,9 @@ footer p {
 
     #packages .package-list {
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    #packages .package-result-meta {
+        top: 8px;
     }
 }
