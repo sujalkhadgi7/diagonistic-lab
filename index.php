@@ -28,8 +28,7 @@ session_start();
                 <a href="health-package.php" class="cta-button">Browse Health Packages</a>
             </div>
             <div class="hero-image-area">
-                <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=1800&auto=format&fit=crop"
-                    alt="Scientist in Modern Lab" class="featured-img">
+                <img src="./assets/image/1.png" alt="Scientist in Modern Lab" class="featured-img">
             </div>
         </section>
 
@@ -62,8 +61,7 @@ session_start();
                         viability from collection to final report.</p>
                 </div>
                 <div class="detail-img">
-                    <img src="https://images.unsplash.com/photo-1581093588401-fbb62a02f120?q=80&w=1800&auto=format&fit=crop"
-                        alt="Medical Lab Technology" class="featured-img">
+                    <img src="./assets/image/2.png" alt="Medical Lab Technology" class="featured-img">
                 </div>
             </div>
 
@@ -76,8 +74,7 @@ session_start();
                         dashboard to view, download, or share high-resolution PDF reports instantly.</p>
                 </div>
                 <div class="detail-img">
-                    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1800&auto=format&fit=crop"
-                        alt="Viewing Digital Health Reports" class="featured-img">
+                    <img src="./assets/image/3.png" alt="Viewing Digital Health Reports" class="featured-img">
                 </div>
             </div>
         </section>
