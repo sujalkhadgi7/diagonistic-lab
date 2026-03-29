@@ -20,17 +20,21 @@ $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
 
 // Validate inputs
 $errors = [];
+$validDate = false;
 
-if (empty($date)) {
-    $errors[] = 'Date parameter is required.';
-} elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-    // Validate date format (YYYY-MM-DD)
-    $errors[] = 'Invalid date format. Expected YYYY-MM-DD.';
-} else {
-    // Validate that the date is a valid calendar date
-    $dateObj = DateTime::createFromFormat('Y-m-d', $date);
-    if (!$dateObj || $dateObj->format('Y-m-d') !== $date) {
-        $errors[] = 'Invalid date. Please provide a valid calendar date.';
+// Date is optional, but if provided must be valid
+if (!empty($date)) {
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        // Validate date format (YYYY-MM-DD)
+        $errors[] = 'Invalid date format. Expected YYYY-MM-DD.';
+    } else {
+        // Validate that the date is a valid calendar date
+        $dateObj = DateTime::createFromFormat('Y-m-d', $date);
+        if (!$dateObj || $dateObj->format('Y-m-d') !== $date) {
+            $errors[] = 'Invalid date. Please provide a valid calendar date.';
+        } else {
+            $validDate = true;
+        }
     }
 }
 
@@ -55,25 +59,38 @@ if (!empty($errors)) {
     exit;
 }
 
-// Build query - use DATE() to compare only date part, not time
-$query = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']} WHERE DATE(date) = ?";
-$params = [$date];
-$paramTypes = 's';
+// Build query based on parameters
+$baseQuery = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']}";
+$whereConditions = [];
+$params = [];
+$paramTypes = '';
 
 // Add status filter if provided
 if (!empty($status)) {
-    if (strtolower($status) === 'pending') {
+    $status = strtolower($status);
+    if ($status === 'pending') {
         // Pending: has no date assigned yet
-        $query = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']} WHERE (date IS NULL OR date = '') AND (report IS NULL OR report = '')";
-        $paramTypes = '';
-        $params = [];
-    } elseif (strtolower($status) === 'scheduled') {
+        $whereConditions[] = "(date IS NULL OR date = '')";
+    } elseif ($status === 'scheduled') {
         // Scheduled: has date but no report
-        $query .= ' AND (report IS NULL OR report = "")';
-    } elseif (strtolower($status) === 'completed') {
+        $whereConditions[] = "(date IS NOT NULL AND date != '' AND (report IS NULL OR report = ''))";
+    } elseif ($status === 'completed') {
         // Completed: has report
-        $query .= ' AND report IS NOT NULL AND report != ""';
+        $whereConditions[] = "(report IS NOT NULL AND report != '')";
     }
+}
+
+// Add date filter if provided and valid
+if ($validDate && !empty($date)) {
+    $whereConditions[] = "DATE(date) = ?";
+    $params[] = $date;
+    $paramTypes .= 's';
+}
+
+// Build the full query
+$query = $baseQuery;
+if (!empty($whereConditions)) {
+    $query .= ' WHERE ' . implode(' AND ', $whereConditions);
 }
 
 $query .= ' ORDER BY date DESC, id DESC LIMIT ? OFFSET ?';
@@ -102,28 +119,21 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // Fetch total count for pagination
-$countQuery = "SELECT COUNT(*) as total FROM {$table['APPOINTMENT']} WHERE DATE(date) = ?";
-$countParams = [$date];
-$countParamTypes = 's';
-
-if (!empty($status)) {
-    if (strtolower($status) === 'pending') {
-        // Pending: has no date assigned yet
-        $countQuery = "SELECT COUNT(*) as total FROM {$table['APPOINTMENT']} WHERE (date IS NULL OR date = '') AND (report IS NULL OR report = '')";
-        $countParamTypes = '';
-        $countParams = [];
-    } elseif (strtolower($status) === 'scheduled') {
-        // Scheduled: has date but no report
-        $countQuery .= ' AND (report IS NULL OR report = "")';
-    } elseif (strtolower($status) === 'completed') {
-        // Completed: has report
-        $countQuery .= ' AND report IS NOT NULL AND report != ""';
-    }
+$countQuery = $baseQuery;
+if (!empty($whereConditions)) {
+    $countQuery .= ' WHERE ' . implode(' AND ', $whereConditions);
 }
 
 $countStmt = $conn->prepare($countQuery);
 if ($countStmt) {
-    $countStmt->bind_param($countParamTypes, ...$countParams);
+    if (!empty($params) && count($params) > 2) {
+        // Remove limit and offset from params for count query
+        $countParams = array_slice($params, 0, count($params) - 2);
+        $countParamTypes = substr($paramTypes, 0, -2);
+        if (!empty($countParams)) {
+            $countStmt->bind_param($countParamTypes, ...$countParams);
+        }
+    }
     $countStmt->execute();
     $totalCount = $countStmt->get_result()->fetch_assoc()['total'];
     $countStmt->close();
