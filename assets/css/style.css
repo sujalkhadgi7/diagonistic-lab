@@ -166,6 +166,111 @@ body {
     color: var(--muted);
 }
 
+#contact {
+    background:
+        radial-gradient(circle at 96% 0%, rgba(15, 118, 110, 0.09), transparent 35%),
+        linear-gradient(180deg, #fbfffe, #f5fcfb);
+}
+
+#contact .contact-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed #cfe3df;
+}
+
+#contact .contact-kicker {
+    margin: 0 0 6px;
+    color: #0f766e;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+#contact .contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#contact .btn-outline {
+    background: #ffffff;
+    color: #0f766e;
+    border: 1px solid #88c7bf;
+}
+
+#contact .btn-outline:hover {
+    color: #ffffff;
+    background: #0f766e;
+    border-color: #0f766e;
+}
+
+#contact .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+#contact .contact-card {
+    background: #ffffff;
+    border: 1px solid #d4e8e4;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 8px 18px rgba(16, 59, 55, 0.08);
+}
+
+#contact .contact-card h3 {
+    margin: 0 0 8px;
+    font-size: 1.01rem;
+}
+
+#contact .contact-card p {
+    margin: 0;
+}
+
+#contact .contact-card p+p {
+    margin-top: 6px;
+}
+
+#contact .contact-card a {
+    color: #0f6f69;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#contact .contact-card a:hover {
+    text-decoration: underline;
+}
+
+#contact .contact-note {
+    margin-top: 14px;
+    background: #eaf8f5;
+    border: 1px solid #bde3dc;
+    border-radius: 12px;
+    padding: 11px 13px;
+    color: #245451;
+}
+
+#contact .contact-map {
+    margin-top: 14px;
+    border: 1px solid #cfe5e0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 22px rgba(15, 65, 61, 0.12);
+    background: #ffffff;
+}
+
+#contact .contact-map iframe {
+    display: block;
+    width: 100%;
+    min-height: 320px;
+    border: 0;
+}
+
 #home {
     text-align: center;
 }
@@ -1056,6 +1161,32 @@ button:hover,
     #packages form[action="booking-success.php"] .package-controls>#packageReset {
         grid-column: span 2;
         min-height: 42px;
+    }
+}
+
+@media (max-width: 860px) {
+    #contact .contact-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #contact .contact-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    #contact .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #contact .contact-actions {
+        width: 100%;
+    }
+
+    #contact .contact-actions .btn {
+        width: 100%;
+        text-align: center;
     }
 }
 
