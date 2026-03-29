@@ -57,6 +57,21 @@ body {
 }
 
 .site-header .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.site-header .brand-logo {
+    width: clamp(44px, 5vw, 58px);
+    height: clamp(44px, 5vw, 58px);
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.site-header .brand-copy {
     display: grid;
     gap: 4px;
 }
@@ -1148,6 +1163,12 @@ button:hover,
 
     .site-header .logo h1 {
         font-size: 1.26rem;
+    }
+
+    .site-header .brand-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
     }
 
     .site-header .brand-meta {

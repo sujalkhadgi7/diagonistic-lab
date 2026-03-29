@@ -30,8 +30,11 @@ if (isset($_SESSION['user_name'])) {
     <div class="header-inner">
         <div class="header-top">
             <div class="logo">
-                <h1>OM Diagnostic Lab</h1>
-                <p class="brand-meta">Accurate diagnostics, compassionate care</p>
+                <img src="assets/image/omcenterlogo.jpeg" alt="OM Diagnostic Lab logo" class="brand-logo" loading="lazy">
+                <div class="brand-copy">
+                    <h1>OM Diagnostic Lab</h1>
+                    <p class="brand-meta">Accurate diagnostics, compassionate care</p>
+                </div>
             </div>
             <div class="header-actions">
                 <?php if (!empty($headerLogoExtra)): ?>
