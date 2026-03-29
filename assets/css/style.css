@@ -243,37 +243,38 @@ button:hover,
 
 #packages .package-controls {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr auto;
-    gap: 10px;
-    margin-bottom: 10px;
+    grid-template-columns: 2.2fr 1fr 1fr auto;
+    gap: 12px;
+    margin-bottom: 12px;
     align-items: center;
     position: sticky;
     top: 8px;
     z-index: 4;
-    background: rgba(250, 255, 254, 0.92);
-    backdrop-filter: blur(6px);
-    padding: 10px;
-    border: 1px solid #d8ebe8;
-    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(242, 252, 249, 0.94));
+    backdrop-filter: blur(8px);
+    padding: 12px;
+    border: 1px solid #cfe6e2;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(16, 73, 68, 0.1);
 }
 
 #packages #packageSearch,
 #packages #packageCategory,
 #packages #packageSort {
-    border: 1px solid #bfded8;
-    background: linear-gradient(180deg, #ffffff, #f3fbfa);
+    border: 1px solid #b8ddd6;
+    background: linear-gradient(180deg, #ffffff, #f5fcfb);
     color: #123f3c;
     border-radius: 12px;
-    min-height: 44px;
+    min-height: 46px;
     font-weight: 600;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 
 #packages #packageSearch {
-    padding-left: 42px;
+    padding-left: 44px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23226f69' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: 14px center;
+    background-position: 15px center;
     background-size: 16px 16px;
 }
 
@@ -305,21 +306,35 @@ button:hover,
 #packages #packageSearch:hover,
 #packages #packageCategory:hover,
 #packages #packageSort:hover {
-    border-color: #94c9c1;
-    background: linear-gradient(180deg, #ffffff, #eef9f7);
+    border-color: #89c8be;
+    background: linear-gradient(180deg, #ffffff, #eefaf7);
 }
 
 #packages #packageSearch:focus,
 #packages #packageCategory:focus,
 #packages #packageSort:focus {
     outline: none;
-    border-color: #2d8d85;
-    box-shadow: 0 0 0 4px rgba(45, 141, 133, 0.16);
+    border-color: #237f78;
+    box-shadow: 0 0 0 4px rgba(35, 127, 120, 0.18);
     transform: translateY(-1px);
 }
 
 #packages .package-controls .btn {
     white-space: nowrap;
+}
+
+#packages #packageReset {
+    min-height: 46px;
+    border: 1px solid #7ab6ae;
+    background: #ffffff;
+    color: #1c5f5a;
+    box-shadow: none;
+}
+
+#packages #packageReset:hover {
+    background: #f0faf8;
+    border-color: #5da59c;
+    filter: none;
 }
 
 #packageResultCount {
@@ -651,6 +666,7 @@ footer p {
     #packages .package-controls {
         grid-template-columns: 1fr 1fr;
         top: 6px;
+        padding: 10px;
     }
 
     #packages .package-controls input,
@@ -666,6 +682,10 @@ footer p {
     #packages #packageSearch,
     #packages #packageCategory,
     #packages #packageSort {
+        min-height: 42px;
+    }
+
+    #packages #packageReset {
         min-height: 42px;
     }
 
@@ -817,10 +837,6 @@ footer p {
     box-shadow: 0 10px 22px rgba(12, 77, 71, 0.08);
 }
 
-#packages #packageReset {
-    min-height: 44px;
-}
-
 #packages #bookingQuickBar {
     border-radius: 16px;
     backdrop-filter: blur(6px);
@@ -843,5 +859,57 @@ footer p {
 
     #packages .package-result-meta {
         top: 8px;
+    }
+}
+
+/* UX refinement: dock action bar in-page instead of floating window */
+#packages form[action="booking-success.php"] {
+    padding-bottom: 18px;
+}
+
+#packages form #bookingQuickBar {
+    position: sticky;
+    bottom: 10px;
+    left: auto;
+    transform: none;
+    width: 100%;
+    margin-top: 14px;
+    z-index: 6;
+    box-shadow: 0 8px 18px rgba(16, 62, 58, 0.14);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(240, 253, 250, 0.98), rgba(230, 249, 245, 0.98));
+}
+
+#packages #bookingQuickBar .btn {
+    min-height: 42px;
+}
+
+#packages>.recommended-section {
+    margin: 12px 0 18px;
+}
+
+#packages .recommended-list {
+    grid-auto-columns: minmax(220px, 260px);
+    gap: 10px;
+}
+
+#packages #recommendedPackages .package-item p {
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    #packages form[action="booking-success.php"] {
+        padding-bottom: 12px;
+    }
+
+    #packages form #bookingQuickBar {
+        bottom: 8px;
+        width: 100%;
+        border-radius: 10px;
+        padding: 8px;
     }
 }

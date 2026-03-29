@@ -24,11 +24,6 @@ include_once __DIR__ . '/src/constants/table.php';
     ?>
 
     <section id="packages" class="section-container">
-        <h2>Our Test Packages</h2>
-        <p class="section-subtitle">
-            Search, filter, compare, and book the right diagnostic packages for your needs.
-        </p>
-
 
         <div class="recommended-section" id="recommendedSection">
             <div class="section-head">
@@ -41,6 +36,12 @@ include_once __DIR__ . '/src/constants/table.php';
             </div>
             <div id="recommendedPackages" class="package-list recommended-list"></div>
         </div>
+
+
+        <h2>Our Test Packages</h2>
+        <p class="section-subtitle">
+            Search, filter, compare, and book the right diagnostic packages for your needs.
+        </p>
 
         <form action="booking-success.php" method="POST">
             <div class="package-controls">
