@@ -292,18 +292,15 @@ include_once __DIR__ . '/src/constants/table.php';
             const recommendedSection = document.getElementById('recommendedSection');
             const recommendedTitle = document.getElementById('recommendedTitle');
             const recommendedSubtitle = document.getElementById('recommendedSubtitle');
-
             const searchInput = document.getElementById('packageSearch');
             const categorySelect = document.getElementById('packageCategory');
             const sortSelect = document.getElementById('packageSort');
             const resetButton = document.getElementById('packageReset');
             const resultCount = document.getElementById('packageResultCount');
-
             const selectedPackageCount = document.getElementById('selectedPackageCount');
             const selectedPackageTotal = document.getElementById('selectedPackageTotal');
             const quickBookButton = document.getElementById('quickBookButton');
             const mainBookButton = document.getElementById('mainBookButton');
-
             const bookingHistory = <?php echo json_encode($bookingHistory, JSON_UNESCAPED_UNICODE); ?>;
 
             if (!packageList || !recommendedContainer) {
@@ -311,8 +308,11 @@ include_once __DIR__ . '/src/constants/table.php';
             }
 
             const cards = Array.from(packageList.querySelectorAll('.package-item'));
-            const cardMap = new Map();
+            const noData = document.createElement('div');
+            noData.className = 'no-package-match';
+            noData.textContent = 'No packages match your filters.';
 
+            const cardMap = new Map();
             cards.forEach((card) => {
                 const id = parseInt(card.dataset.id || '0', 10);
                 if (id) {
@@ -320,51 +320,59 @@ include_once __DIR__ . '/src/constants/table.php';
                 }
             });
 
-            const noData = document.createElement('div');
-            noData.className = 'no-package-match';
-            noData.textContent = 'No packages match your filters.';
-
             function parsePackagesFromDom() {
-                return cards.map((card) => {
-                    const relatedPackages = (card.dataset.relatedPackages || '')
-                        .split(',')
-                        .map((value) => parseInt(value, 10))
-                        .filter((value) => Number.isInteger(value) && value > 0);
+                return cards
+                    .map((card) => {
+                        const relatedPackages = (card.dataset.relatedPackages || '')
+                            .split(',')
+                            .map((value) => parseInt(value, 10))
+                            .filter((value) => Number.isInteger(value) && value > 0);
 
-                    return {
-                        id: parseInt(card.dataset.id || '0', 10),
-                        index: parseInt(card.dataset.index || '0', 10),
-                        name: card.querySelector('h3')?.textContent?.trim() || '',
-                        description: card.querySelector('p')?.textContent?.trim() || '',
-                        category: card.dataset.category || '',
-                        pricing: parseInt(card.dataset.price || '0', 10),
-                        popularity: parseInt(card.dataset.popularity || '0', 10),
-                        relatedPackages
-                    };
-                }).filter((pkg) => Number.isInteger(pkg.id) && pkg.id > 0);
+                        return {
+                            id: parseInt(card.dataset.id || '0', 10),
+                            index: parseInt(card.dataset.index || '0', 10),
+                            name: card.querySelector('h3')?.textContent?.trim() || '',
+                            description: card.querySelector('p')?.textContent?.trim() || '',
+                            category: card.dataset.category || '',
+                            pricing: parseInt(card.dataset.price || '0', 10),
+                            popularity: parseInt(card.dataset.popularity || '0', 10),
+                            relatedPackages
+                        };
+                    })
+                    .filter((pkg) => Number.isInteger(pkg.id) && pkg.id > 0);
             }
 
             const packages = parsePackagesFromDom();
 
             function populateCategories() {
-                if (!categorySelect) return;
+                if (!categorySelect) {
+                    return;
+                }
 
-                const categories = [...new Set(packages.map(pkg => pkg.category).filter(Boolean))];
+                const existingValues = new Set(
+                    Array.from(categorySelect.options).map((option) => option.value)
+                );
 
-                categories
-                    .sort((a, b) => a.localeCompare(b))
-                    .forEach((categoryValue) => {
-                        const option = document.createElement('option');
-                        option.value = categoryValue;
-                        option.textContent = categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1);
-                        categorySelect.appendChild(option);
-                    });
+                const categories = Array.from(
+                    new Set(packages.map((pkg) => pkg.category).filter(Boolean))
+                ).sort((a, b) => a.localeCompare(b));
+
+                categories.forEach((categoryValue) => {
+                    if (existingValues.has(categoryValue)) {
+                        return;
+                    }
+
+                    const option = document.createElement('option');
+                    option.value = categoryValue;
+                    option.textContent = categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1);
+                    categorySelect.appendChild(option);
+                });
             }
 
             function updateBookingSummary() {
                 const selected = cards.filter((card) => {
                     const checkbox = card.querySelector('input[type="checkbox"]');
-                    return checkbox?.checked;
+                    return checkbox ? checkbox.checked : false;
                 });
 
                 const count = selected.length;
@@ -389,24 +397,23 @@ include_once __DIR__ . '/src/constants/table.php';
                 }
             }
 
-            function getRecommendedPackages(packages, history, limit = 5) {
+            function getRecommendedPackages(allPackages, history, limit) {
                 const bookedIds = new Set(history.map((item) => item.packageId));
-                const bookedPackages = packages.filter((pkg) => bookedIds.has(pkg.id));
+                const bookedPackages = allPackages.filter((pkg) => bookedIds.has(pkg.id));
 
                 if (!history.length || !bookedPackages.length) {
-                    return [...packages]
+                    return [...allPackages]
                         .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
                         .slice(0, limit)
                         .map((pkg) => ({
                             ...pkg,
-                            score: pkg.popularity || 0,
-                            reasons: ['Popular package']
+                            score: pkg.popularity || 0
                         }));
                 }
 
                 const candidateMap = new Map();
 
-                function addCandidate(pkg, points, reason, sourceBookedId) {
+                function addCandidate(pkg, points, sourceBookedId) {
                     if (!pkg || bookedIds.has(pkg.id)) {
                         return;
                     }
@@ -415,7 +422,6 @@ include_once __DIR__ . '/src/constants/table.php';
                         candidateMap.set(pkg.id, {
                             ...pkg,
                             score: 0,
-                            reasons: [],
                             sourceBookedIds: new Set()
                         });
                     }
@@ -423,14 +429,10 @@ include_once __DIR__ . '/src/constants/table.php';
                     const existing = candidateMap.get(pkg.id);
                     existing.score += points;
 
-                    if (reason && !existing.reasons.includes(reason)) {
-                        existing.reasons.push(reason);
-                    }
-
                     if (Number.isInteger(sourceBookedId)) {
-                        const before = existing.sourceBookedIds.size;
+                        const beforeSize = existing.sourceBookedIds.size;
                         existing.sourceBookedIds.add(sourceBookedId);
-                        if (existing.sourceBookedIds.size > before) {
+                        if (existing.sourceBookedIds.size > beforeSize) {
                             existing.score += 15;
                         }
                     }
@@ -438,28 +440,18 @@ include_once __DIR__ . '/src/constants/table.php';
 
                 bookedPackages.forEach((bookedPkg) => {
                     (bookedPkg.relatedPackages || []).forEach((relatedId) => {
-                        const relatedPkg = packages.find((pkg) => pkg.id === relatedId);
+                        const relatedPkg = allPackages.find((pkg) => pkg.id === relatedId);
                         if (relatedPkg) {
-                            addCandidate(
-                                relatedPkg,
-                                50,
-                                `Related to ${bookedPkg.name}`,
-                                bookedPkg.id
-                            );
+                            addCandidate(relatedPkg, 50, bookedPkg.id);
                         }
                     });
                 });
 
                 if (candidateMap.size < limit) {
                     bookedPackages.forEach((bookedPkg) => {
-                        packages.forEach((pkg) => {
+                        allPackages.forEach((pkg) => {
                             if (pkg.category === bookedPkg.category && !bookedIds.has(pkg.id)) {
-                                addCandidate(
-                                    pkg,
-                                    20,
-                                    `Same category as ${bookedPkg.name}`,
-                                    bookedPkg.id
-                                );
+                                addCandidate(pkg, 20, bookedPkg.id);
                             }
                         });
                     });
@@ -471,32 +463,26 @@ include_once __DIR__ . '/src/constants/table.php';
 
                 return Array.from(candidateMap.values())
                     .sort((a, b) => b.score - a.score)
-                    .slice(0, limit)
-                    .map((candidate) => ({
-                        ...candidate,
-                        sourceBookedIds: undefined
-                    }));
+                    .slice(0, limit);
             }
 
             function selectPackageById(packageId) {
-                const card = cardMap.get(packageId);
-                if (!card) return;
+                const mainCard = cardMap.get(packageId);
+                if (!mainCard) {
+                    return;
+                }
 
-                const checkbox = card.querySelector('input[type="checkbox"]');
-                if (checkbox && !checkbox.checked) {
-                    checkbox.checked = true;
+                const mainCheckbox = mainCard.querySelector('input[type="checkbox"]');
+                if (mainCheckbox && !mainCheckbox.checked) {
+                    mainCheckbox.checked = true;
                     updateBookingSummary();
                 }
 
-                card.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-
-                card.classList.add('package-highlight');
+                mainCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                mainCard.classList.add('package-highlight');
                 setTimeout(() => {
-                    card.classList.remove('package-highlight');
-                }, 1500);
+                    mainCard.classList.remove('package-highlight');
+                }, 1200);
             }
 
             function renderRecommendations(recommendations) {
@@ -508,7 +494,6 @@ include_once __DIR__ . '/src/constants/table.php';
                 }
 
                 recommendedSection.style.display = '';
-
                 const hasHistory = bookingHistory.length > 0;
                 recommendedTitle.textContent = hasHistory ? 'Recommended For You' : 'Popular Packages';
                 recommendedSubtitle.textContent = hasHistory
@@ -517,36 +502,43 @@ include_once __DIR__ . '/src/constants/table.php';
 
                 recommendations.forEach((pkg) => {
                     const card = document.createElement('div');
-                    card.className = 'package-item recommended-card';
-
-                    const reasons = (pkg.reasons || []).slice(0, 2);
-
+                    card.className = 'package-item';
                     card.innerHTML = `
-                        <div class="recommendation-badge">Recommended</div>
                         <h3>${pkg.name}</h3>
                         <p>${pkg.description}</p>
                         <div class="package-meta">
                             <span class="package-category">${pkg.category}</span>
                             <span class="package-price">Rs. ${pkg.pricing || 0}</span>
                         </div>
-                        <div class="recommendation-reasons">
-                            ${reasons.map(reason => `<span class="reason-chip">${reason}</span>`).join('')}
-                        </div>
-                        <button type="button" class="btn recommendation-action" data-package-id="${pkg.id}">
-                            Select this package
-                        </button>
+                        <label class="package-select">
+                            <input type="checkbox" class="recommend-select" data-package-id="${pkg.id}">
+                            <span>Select package</span>
+                        </label>
                     `;
 
-                    recommendedContainer.appendChild(card);
-                });
+                    const recommendCheckbox = card.querySelector('.recommend-select');
+                    if (recommendCheckbox) {
+                        const mainCard = cardMap.get(pkg.id);
+                        const mainCheckbox = mainCard ? mainCard.querySelector('input[type="checkbox"]') : null;
 
-                recommendedContainer.querySelectorAll('.recommendation-action').forEach((button) => {
-                    button.addEventListener('click', () => {
-                        const packageId = parseInt(button.dataset.packageId || '0', 10);
-                        if (packageId) {
-                            selectPackageById(packageId);
+                        if (mainCheckbox) {
+                            recommendCheckbox.checked = mainCheckbox.checked;
+
+                            recommendCheckbox.addEventListener('change', () => {
+                                mainCheckbox.checked = recommendCheckbox.checked;
+                                updateBookingSummary();
+                                if (recommendCheckbox.checked) {
+                                    selectPackageById(pkg.id);
+                                }
+                            });
+
+                            mainCheckbox.addEventListener('change', () => {
+                                recommendCheckbox.checked = mainCheckbox.checked;
+                            });
                         }
-                    });
+                    }
+
+                    recommendedContainer.appendChild(card);
                 });
             }
 
@@ -562,7 +554,6 @@ include_once __DIR__ . '/src/constants/table.php';
 
                     const matchesSearch = !term || name.includes(term) || description.includes(term);
                     const matchesCategory = category === 'all' || cardCategory === category;
-
                     return matchesSearch && matchesCategory;
                 });
 
@@ -581,7 +572,6 @@ include_once __DIR__ . '/src/constants/table.php';
                     if (sort === 'price-desc') return priceB - priceA;
                     if (sort === 'popularity-desc') return popularityB - popularityA;
                     if (sort === 'name-asc') return nameA.localeCompare(nameB);
-
                     return indexA - indexB;
                 });
 
@@ -595,11 +585,9 @@ include_once __DIR__ . '/src/constants/table.php';
                 });
 
                 const hasMatch = filtered.length > 0;
-
                 if (!hasMatch && !packageList.contains(noData)) {
                     packageList.appendChild(noData);
                 }
-
                 if (hasMatch && packageList.contains(noData)) {
                     noData.remove();
                 }
@@ -609,23 +597,14 @@ include_once __DIR__ . '/src/constants/table.php';
                 }
             }
 
-            const recommendations = getRecommendedPackages(packages, bookingHistory, 5);
-            renderRecommendations(recommendations);
             populateCategories();
+            renderRecommendations(getRecommendedPackages(packages, bookingHistory, 5));
             applyFilters();
             updateBookingSummary();
 
-            if (searchInput) {
-                searchInput.addEventListener('input', applyFilters);
-            }
-
-            if (categorySelect) {
-                categorySelect.addEventListener('change', applyFilters);
-            }
-
-            if (sortSelect) {
-                sortSelect.addEventListener('change', applyFilters);
-            }
+            if (searchInput) searchInput.addEventListener('input', applyFilters);
+            if (categorySelect) categorySelect.addEventListener('change', applyFilters);
+            if (sortSelect) sortSelect.addEventListener('change', applyFilters);
 
             if (resetButton) {
                 resetButton.addEventListener('click', () => {
