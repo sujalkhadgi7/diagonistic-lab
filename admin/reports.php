@@ -15,6 +15,22 @@ $stmt->execute();
 $result = $stmt->get_result();
 $data = $result->fetch_all(MYSQLI_ASSOC);
 
+function deleteReportFiles($reportCsv, $uploadDir)
+{
+  if (empty($reportCsv)) {
+    return;
+  }
+
+  $files = array_filter(array_map('trim', explode(',', $reportCsv)));
+  foreach ($files as $file) {
+    $safeName = basename($file);
+    $fullPath = rtrim($uploadDir, '/') . '/' . $safeName;
+    if (is_file($fullPath)) {
+      @unlink($fullPath);
+    }
+  }
+}
+
 // Handle form submission to update the appointment date
 if (isset($_POST['update_appointment'])) {
   $appointmentId = $_POST['appointment_id'];
@@ -31,29 +47,27 @@ if (isset($_POST['update_appointment'])) {
 // Handle report upload
 if (isset($_POST['update_report'])) {
   $appointmentId = $_POST['appointment_id'];
+  $removeExistingReport = isset($_POST['remove_existing_report']) && $_POST['remove_existing_report'] === '1';
+  $uploadDir = "../uploads/";
+
+  if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0755, true);
+  }
+
+  $existingReportCsv = '';
+  $existingSql = "SELECT report FROM $table[APPOINTMENT] WHERE id = ?";
+  $stmtExisting = $conn->prepare($existingSql);
+  $stmtExisting->bind_param("i", $appointmentId);
+  $stmtExisting->execute();
+  $existingResult = $stmtExisting->get_result();
+  if ($existingRow = $existingResult->fetch_assoc()) {
+    $existingReportCsv = $existingRow['report'] ?? '';
+  }
+  $stmtExisting->close();
 
   // Handle file upload
   $uploadedFiles = [];
   if (!empty($_FILES['report_images']['name'][0])) {
-    $uploadDir = "../uploads/";
-    if (!is_dir($uploadDir)) {
-      mkdir($uploadDir, 0755, true);
-    }
-
-    // Keep existing files and append new uploads.
-    $existingFiles = [];
-    $existingSql = "SELECT report FROM $table[APPOINTMENT] WHERE id = ?";
-    $stmtExisting = $conn->prepare($existingSql);
-    $stmtExisting->bind_param("i", $appointmentId);
-    $stmtExisting->execute();
-    $existingResult = $stmtExisting->get_result();
-    if ($existingRow = $existingResult->fetch_assoc()) {
-      if (!empty($existingRow['report'])) {
-        $existingFiles = array_filter(array_map('trim', explode(',', $existingRow['report'])));
-      }
-    }
-    $stmtExisting->close();
-
     $fileCount = count($_FILES['report_images']['name']);
 
     for ($i = 0; $i < $fileCount; $i++) {
@@ -75,17 +89,31 @@ if (isset($_POST['update_report'])) {
         $uploadedFiles[] = $newFileName;
       }
     }
+  }
 
-    if (!empty($uploadedFiles)) {
-      $allFiles = array_values(array_unique(array_merge($existingFiles, $uploadedFiles)));
-      $filePaths = implode(",", $allFiles); // store file paths as comma-separated list
-      $updateSql = "UPDATE $table[APPOINTMENT] SET report = ? WHERE id = ?";
-      $stmtUpdate = $conn->prepare($updateSql);
-      $stmtUpdate->bind_param("si", $filePaths, $appointmentId);
-      $stmtUpdate->execute();
-      $stmtUpdate->close();
-      header("Refresh: 0");
+  if ($removeExistingReport && empty($uploadedFiles) && !empty($existingReportCsv)) {
+    deleteReportFiles($existingReportCsv, $uploadDir);
+    $clearSql = "UPDATE $table[APPOINTMENT] SET report = NULL WHERE id = ?";
+    $stmtClear = $conn->prepare($clearSql);
+    $stmtClear->bind_param("i", $appointmentId);
+    $stmtClear->execute();
+    $stmtClear->close();
+    header("Refresh: 0");
+  }
+
+  if (!empty($uploadedFiles)) {
+    // Replacing reports should remove old files from disk.
+    if (!empty($existingReportCsv)) {
+      deleteReportFiles($existingReportCsv, $uploadDir);
     }
+
+    $filePaths = implode(",", array_values(array_unique($uploadedFiles)));
+    $updateSql = "UPDATE $table[APPOINTMENT] SET report = ? WHERE id = ?";
+    $stmtUpdate = $conn->prepare($updateSql);
+    $stmtUpdate->bind_param("si", $filePaths, $appointmentId);
+    $stmtUpdate->execute();
+    $stmtUpdate->close();
+    header("Refresh: 0");
   }
 }
 
@@ -180,7 +208,7 @@ if (isset($_POST['update_report'])) {
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Upload / View Report</h2>
-      <form action="" method="POST" enctype="multipart/form-data">
+      <form id="reportForm" action="" method="POST" enctype="multipart/form-data">
         <!-- Hidden field to pass the appointment id -->
         <input type="hidden" id="appointment_id" name="appointment_id">
 
@@ -308,6 +336,12 @@ if (isset($_POST['update_report'])) {
             reports.forEach(function (file) {
               reportDisplayHtml += `<img src="../uploads/${file}" alt="Report Image" class="report-preview-image">`;
             });
+            reportDisplayHtml += `
+              <label>
+                <input type="checkbox" id="remove_existing_report" name="remove_existing_report" value="1">
+                Remove current reports
+              </label>
+            `;
             reportDisplayHtml += buildUploaderHtml("Change Reports (optional):", false);
             document.getElementById("reportDisplay").innerHTML = reportDisplayHtml;
           } else {
@@ -321,6 +355,16 @@ if (isset($_POST['update_report'])) {
     document.addEventListener("change", function (event) {
       if (event.target && event.target.name === "report_images[]") {
         renderSelectedImages(event.target.files);
+      }
+    });
+
+    document.getElementById("reportForm").addEventListener("submit", function (event) {
+      var removeCheckbox = document.getElementById("remove_existing_report");
+      if (removeCheckbox && removeCheckbox.checked) {
+        var confirmRemove = confirm("Are you sure you want to remove the current report files? This cannot be undone.");
+        if (!confirmRemove) {
+          event.preventDefault();
+        }
       }
     });
 
