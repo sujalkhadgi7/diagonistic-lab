@@ -40,6 +40,8 @@ $sortBy = $_GET['sort'] ?? 'recent';
 $currentPage = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $appointmentId = isset($_GET['appointment_id']) ? (int) $_GET['appointment_id'] : 0;
 $itemsPerPage = 10;
+$hasFilterRequest = isset($_GET['search']) || isset($_GET['status']) || isset($_GET['sort']) || isset($_GET['appointment_id']) || isset($_GET['page']);
+$isDefaultLatestReportsView = !$hasFilterRequest;
 
 // Get patient statistics
 $totalPatients = 0;
@@ -77,9 +79,12 @@ if ($appointmentId > 0) {
 }
 
 if ($statusFilter === 'uploaded') {
-  $whereConditions[] = "report IS NOT NULL AND report != ''";
+  $whereConditions[] = "(report IS NOT NULL AND report != '')";
 } elseif ($statusFilter === 'pending') {
-  $whereConditions[] = "report IS NULL OR report = ''";
+  $whereConditions[] = "(report IS NULL OR report = '')";
+} elseif ($isDefaultLatestReportsView) {
+  // On initial page load, show latest uploaded reports by default.
+  $whereConditions[] = "(report IS NOT NULL AND report != '')";
 }
 
 $whereClause = !empty($whereConditions) ? ' WHERE ' . implode(' AND ', $whereConditions) : '';
@@ -115,30 +120,32 @@ if ($currentPage > $totalPages && $totalPages > 0) {
 $offset = ($currentPage - 1) * $itemsPerPage;
 
 // Get paginated results
-if ($appointmentId > 0 || $search !== '' || $statusFilter !== '') {
-  $listSql = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']}" . $whereClause . "
-              ORDER BY " . $orderBy . "
-              LIMIT ? OFFSET ?";
-  $listStmt = $conn->prepare($listSql);
-  $types = !empty($queryParams) ? str_repeat('s', count($queryParams)) . 'ii' : 'ii';
-  $params = array_merge($queryParams, [$itemsPerPage, $offset]);
-  if (!empty($params)) {
-    $listStmt->bind_param($types, ...$params);
-  }
-  $listStmt->execute();
-  $listResult = $listStmt->get_result();
-  $rows = $listResult->fetch_all(MYSQLI_ASSOC);
-  $listStmt->close();
+$listSql = "SELECT id, name, email, phone, package, date, report FROM {$table['APPOINTMENT']}" . $whereClause . "
+            ORDER BY " . $orderBy . "
+            LIMIT ? OFFSET ?";
+$listStmt = $conn->prepare($listSql);
+$types = !empty($queryParams) ? str_repeat('s', count($queryParams)) . 'ii' : 'ii';
+$params = array_merge($queryParams, [$itemsPerPage, $offset]);
+if (!empty($params)) {
+  $listStmt->bind_param($types, ...$params);
+}
+$listStmt->execute();
+$listResult = $listStmt->get_result();
+$rows = $listResult->fetch_all(MYSQLI_ASSOC);
+$listStmt->close();
 
-  if (count($rows) === 0) {
-    if ($appointmentId > 0) {
-      $message = 'No appointment found for that patient ID.';
-    } else {
-      $message = 'No patients matched your search.';
-    }
+if (count($rows) === 0) {
+  if ($appointmentId > 0) {
+    $message = 'No appointment found for that patient ID.';
+  } elseif ($isDefaultLatestReportsView) {
+    $message = 'No uploaded reports found yet.';
+  } else {
+    $message = 'No patients matched your search.';
   }
 } else {
-  $message = 'Search by patient name, email, or phone, or open directly from the appointments list.';
+  if ($isDefaultLatestReportsView) {
+    $message = 'Showing latest uploaded reports.';
+  }
 }
 
 ?>
@@ -268,7 +275,23 @@ if ($appointmentId > 0 || $search !== '' || $statusFilter !== '') {
               <?php foreach ($rows as $row): ?>
                 <?php
                 $files = parseReportFiles($row['report'] ?? '');
-                $hasReports = count($files) > 0;
+                $reportEntries = [];
+                $existingReportCount = 0;
+                foreach ($files as $file) {
+                  $absolutePath = __DIR__ . '/../uploads/' . $file;
+                  $fileExists = is_file($absolutePath);
+                  if ($fileExists) {
+                    $existingReportCount++;
+                  }
+
+                  $reportEntries[] = [
+                    'file' => $file,
+                    'exists' => $fileExists,
+                    'isPdf' => preg_match('/\.pdf$/i', $file) === 1,
+                    'url' => '../uploads/' . rawurlencode($file),
+                  ];
+                }
+                $hasReports = $existingReportCount > 0;
                 ?>
                 <tr>
                   <td><?php echo (int) $row['id']; ?></td>
@@ -278,35 +301,25 @@ if ($appointmentId > 0 || $search !== '' || $statusFilter !== '') {
                   <td><?php echo h($row['package']); ?></td>
                   <td><?php echo h($row['date'] ?: 'Not scheduled'); ?></td>
                   <td>
-                    <?php
-                    $files = parseReportFiles($row['report'] ?? '');
-                    $hasReports = count($files) > 0;
-                    ?>
                     <span class="status-badge <?php echo $hasReports ? 'status-completed' : 'status-pending'; ?>">
                       <?php echo $hasReports ? '✔️ Uploaded' : '⏳ Pending'; ?>
                     </span>
                   </td>
                   <td>
-                    <?php if ($hasReports): ?>
+                    <?php if (!empty($reportEntries)): ?>
                       <div class="report-list">
-                        <?php foreach ($files as $file): ?>
-                          <?php
-                          $isPdf = preg_match('/\.pdf$/i', $file) === 1;
-                          $reportUrl = '../uploads/' . rawurlencode($file);
-                          $absolutePath = __DIR__ . '/../uploads/' . $file;
-                          $fileExists = is_file($absolutePath);
-                          ?>
-                          <div class="report-entry <?php echo !$fileExists ? 'missing' : ''; ?>">
-                            <?php if (!$isPdf && $fileExists): ?>
-                              <img src="<?php echo h($reportUrl); ?>" alt="Patient Report" class="report-preview">
-                            <?php elseif ($isPdf): ?>
+                        <?php foreach ($reportEntries as $entry): ?>
+                          <div class="report-entry <?php echo !$entry['exists'] ? 'missing' : ''; ?>">
+                            <?php if (!$entry['isPdf'] && $entry['exists']): ?>
+                              <img src="<?php echo h($entry['url']); ?>" alt="Patient Report" class="report-preview">
+                            <?php elseif ($entry['isPdf']): ?>
                               <span class="pdf-icon">📄</span>
                             <?php endif; ?>
-                            <a href="<?php echo h($reportUrl); ?>" target="_blank" rel="noopener noreferrer"
+                            <a href="<?php echo h($entry['url']); ?>" target="_blank" rel="noopener noreferrer"
                               class="report-link">
-                              <?php echo h($file); ?>
+                              <?php echo h($entry['file']); ?>
                             </a>
-                            <?php if (!$fileExists): ?>
+                            <?php if (!$entry['exists']): ?>
                               <span class="file-missing">Missing</span>
                             <?php endif; ?>
                           </div>
