@@ -35,21 +35,50 @@ if (isset($_POST['update_report'])) {
   // Handle file upload
   $uploadedFiles = [];
   if (!empty($_FILES['report_images']['name'][0])) {
+    $uploadDir = "../uploads/";
+    if (!is_dir($uploadDir)) {
+      mkdir($uploadDir, 0755, true);
+    }
+
+    // Keep existing files and append new uploads.
+    $existingFiles = [];
+    $existingSql = "SELECT report FROM $table[APPOINTMENT] WHERE id = ?";
+    $stmtExisting = $conn->prepare($existingSql);
+    $stmtExisting->bind_param("i", $appointmentId);
+    $stmtExisting->execute();
+    $existingResult = $stmtExisting->get_result();
+    if ($existingRow = $existingResult->fetch_assoc()) {
+      if (!empty($existingRow['report'])) {
+        $existingFiles = array_filter(array_map('trim', explode(',', $existingRow['report'])));
+      }
+    }
+    $stmtExisting->close();
+
     $fileCount = count($_FILES['report_images']['name']);
 
     for ($i = 0; $i < $fileCount; $i++) {
       $fileTmpPath = $_FILES['report_images']['tmp_name'][$i];
-      $fileName = $_FILES['report_images']['name'][$i];
-      $filePath = "../uploads/" . $fileName;
+      $fileName = basename($_FILES['report_images']['name'][$i]);
+      $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+      // Accept only common image formats.
+      $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+      if (!in_array($fileExt, $allowedExtensions)) {
+        continue;
+      }
+
+      $newFileName = uniqid('report_', true) . '.' . $fileExt;
+      $filePath = $uploadDir . $newFileName;
 
       // Move uploaded files to the "uploads" folder
       if (move_uploaded_file($fileTmpPath, $filePath)) {
-        $uploadedFiles[] = $fileName;
+        $uploadedFiles[] = $newFileName;
       }
     }
 
     if (!empty($uploadedFiles)) {
-      $filePaths = implode(",", $uploadedFiles); // store file paths as comma-separated list
+      $allFiles = array_values(array_unique(array_merge($existingFiles, $uploadedFiles)));
+      $filePaths = implode(",", $allFiles); // store file paths as comma-separated list
       $updateSql = "UPDATE $table[APPOINTMENT] SET report = ? WHERE id = ?";
       $stmtUpdate = $conn->prepare($updateSql);
       $stmtUpdate->bind_param("si", $filePaths, $appointmentId);
@@ -128,7 +157,8 @@ if (isset($_POST['update_report'])) {
                   <td><?php echo $row["package"]; ?></td>
                   <td>
                     <button class="openModalBtn" data-appointment-id="<?php echo $row["id"]; ?>"
-                      data-current-date="<?php echo $row["date"]; ?>">
+                      data-current-date="<?php echo $row["date"]; ?>"
+                      data-report="<?php echo htmlspecialchars($row["report"] ?? '', ENT_QUOTES); ?>">
                       <?php echo $row["report"] ? "View/Change Report" : "Upload Report"; ?>
                     </button>
                   </td>
@@ -163,6 +193,60 @@ if (isset($_POST['update_report'])) {
   </div>
 
   <script>
+    function buildUploaderHtml(labelText, isRequired) {
+      return `
+        <p>${labelText}</p>
+        <input type="file" name="report_images[]" accept="image/*" multiple ${isRequired ? 'required' : ''}>
+        <p class="upload-help">Tip: You can select multiple images at once (Cmd/Ctrl + click).</p>
+        <div id="selectedImagePreview" class="selected-image-preview"></div>
+      `;
+    }
+
+    function renderSelectedImages(files) {
+      var previewRoot = document.getElementById("selectedImagePreview");
+      if (!previewRoot) {
+        return;
+      }
+
+      previewRoot.innerHTML = "";
+
+      if (!files || files.length === 0) {
+        return;
+      }
+
+      var title = document.createElement("p");
+      title.textContent = "Selected images:";
+      previewRoot.appendChild(title);
+
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+
+        if (!file.type || file.type.indexOf("image/") !== 0) {
+          continue;
+        }
+
+        var item = document.createElement("div");
+        item.className = "selected-image-item";
+
+        var img = document.createElement("img");
+        img.className = "report-preview-image";
+        img.alt = "Selected report image";
+
+        var name = document.createElement("p");
+        name.textContent = file.name;
+
+        var objectUrl = URL.createObjectURL(file);
+        img.src = objectUrl;
+        img.onload = function () {
+          URL.revokeObjectURL(this.src);
+        };
+
+        item.appendChild(img);
+        item.appendChild(name);
+        previewRoot.appendChild(item);
+      }
+    }
+
     function fetchAppointments() {
       var selectedDate = document.getElementById("appointmentDate").value;
       var tableBody = document.getElementById("appointmentsBody");
@@ -224,21 +308,21 @@ if (isset($_POST['update_report'])) {
             reports.forEach(function (file) {
               reportDisplayHtml += `<img src="../uploads/${file}" alt="Report Image" class="report-preview-image">`;
             });
-            reportDisplayHtml += `
-              <p>Change Reports (optional):</p>
-              <input type="file" name="report_images[]" accept="image/*" multiple>
-            `;
+            reportDisplayHtml += buildUploaderHtml("Change Reports (optional):", false);
             document.getElementById("reportDisplay").innerHTML = reportDisplayHtml;
           } else {
-            document.getElementById("reportDisplay").innerHTML = `
-              <p>Upload Reports:</p>
-              <input type="file" name="report_images[]" accept="image/*" multiple>
-            `;
+            document.getElementById("reportDisplay").innerHTML = buildUploaderHtml("Upload Reports:", true);
           }
           modal.style.display = "block";
         };
       });
     }
+
+    document.addEventListener("change", function (event) {
+      if (event.target && event.target.name === "report_images[]") {
+        renderSelectedImages(event.target.files);
+      }
+    });
 
     // Attach events on page load
     attachModalEvents();
