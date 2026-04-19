@@ -330,6 +330,7 @@ include_once __DIR__ . '/src/constants/table.php';
                 const bookedIds = new Set(history.map((item) => item.packageId));
                 const bookedPackages = allPackages.filter((pkg) => bookedIds.has(pkg.id));
 
+                // no history  remomends the the most popular packages. 
                 if (!history.length || !bookedPackages.length) {
                     return [...allPackages]
                         .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))

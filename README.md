@@ -69,3 +69,7 @@ If `LAB_SMTP_PASSWORD` is missing, the app will skip sending and return a clear 
 - Health package page reads package catalog from database table `diagnostic_packages`.
 - If no package rows exist, users will see: `There is no any test report right now.`
 - Shared includes are standardized with `include_once`/`require_once` for safer loading.
+
+## Additional Documentation
+
+- Recommendation algorithm: `docs/recommendation-algorithm.md`
